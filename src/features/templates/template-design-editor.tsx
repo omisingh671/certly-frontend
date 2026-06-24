@@ -69,7 +69,7 @@ type TemplateDesignEditorProps = {
 };
 
 export type TemplateDesignEditorHandle = {
-  saveBeforeNavigation: () => Promise<boolean>;
+  confirmLeave: () => Promise<boolean>;
 };
 
 const formatLayoutJson = (layout: TemplateLayoutJson): string =>
@@ -118,9 +118,13 @@ export const TemplateDesignEditor = forwardRef<TemplateDesignEditorHandle, Templ
   const [snapToGrid, setSnapToGrid] = useState(false);
   const [snapToGuides, setSnapToGuides] = useState(true);
   const [isNavigationSavePending, setIsNavigationSavePending] = useState(false);
+  const [leaveConfirmationOpen, setLeaveConfirmationOpen] = useState(false);
   const initializedTemplateIdRef = useRef<string | null>(null);
   const savePromiseRef = useRef<Promise<boolean> | null>(null);
-  const navigationSaveInProgressRef = useRef(false);
+  const pendingLeaveConfirmationRef = useRef<{
+    promise: Promise<boolean>;
+    resolve: (shouldLeave: boolean) => void;
+  } | null>(null);
 
   const fieldsQuery = useQuery({
     queryKey: ["template-fields", templateId],
@@ -294,35 +298,66 @@ export const TemplateDesignEditor = forwardRef<TemplateDesignEditorHandle, Templ
     return savePromise;
   }, [jsonError, pushToast, saveDesignMutation]);
 
-  const saveBeforeNavigation = useCallback(async (): Promise<boolean> => {
-    if (!hasUnsavedChanges) {
-      return true;
+  const resolveLeaveConfirmation = useCallback((shouldLeave: boolean) => {
+    const pendingConfirmation = pendingLeaveConfirmationRef.current;
+    if (!pendingConfirmation) {
+      return;
     }
 
+    pendingLeaveConfirmationRef.current = null;
+    setLeaveConfirmationOpen(false);
+    pendingConfirmation.resolve(shouldLeave);
+  }, []);
+
+  const confirmLeave = useCallback((): Promise<boolean> => {
+    if (!hasUnsavedChanges) {
+      return Promise.resolve(true);
+    }
+
+    if (pendingLeaveConfirmationRef.current) {
+      return pendingLeaveConfirmationRef.current.promise;
+    }
+
+    let resolveConfirmation: (shouldLeave: boolean) => void = () => undefined;
+    const confirmationPromise = new Promise<boolean>((resolve) => {
+      resolveConfirmation = resolve;
+    });
+
+    pendingLeaveConfirmationRef.current = { promise: confirmationPromise, resolve: resolveConfirmation };
+    setLeaveConfirmationOpen(true);
+    return confirmationPromise;
+  }, [hasUnsavedChanges]);
+
+  const saveAndLeave = useCallback(async () => {
     setIsNavigationSavePending(true);
     try {
-      return await persistDesign();
+      const saved = await persistDesign();
+      if (saved) {
+        resolveLeaveConfirmation(true);
+      }
     } finally {
       setIsNavigationSavePending(false);
     }
-  }, [hasUnsavedChanges, persistDesign]);
+  }, [persistDesign, resolveLeaveConfirmation]);
 
-  useImperativeHandle(ref, () => ({ saveBeforeNavigation }), [saveBeforeNavigation]);
+  useImperativeHandle(ref, () => ({ confirmLeave }), [confirmLeave]);
 
   const blocker = useBlocker(hasUnsavedChanges);
 
   useEffect(() => {
-    if (blocker.state !== "blocked" || navigationSaveInProgressRef.current) {
+    if (blocker.state !== "blocked") {
       return;
     }
 
-    navigationSaveInProgressRef.current = true;
-    void saveBeforeNavigation().then((saved) => {
-      navigationSaveInProgressRef.current = false;
-      if (saved) blocker.proceed();
-      else blocker.reset();
+    void confirmLeave().then((shouldLeave) => {
+      if (shouldLeave) {
+        blocker.proceed();
+        return;
+      }
+
+      blocker.reset();
     });
-  }, [blocker, saveBeforeNavigation]);
+  }, [blocker, confirmLeave]);
 
   useEffect(() => {
     if (!hasUnsavedChanges) {
@@ -1259,6 +1294,32 @@ export const TemplateDesignEditor = forwardRef<TemplateDesignEditorHandle, Templ
           onChange={(event) => handleJsonEditorChange(event.target.value)}
         />
       </Card>
+      {leaveConfirmationOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-text-primary/35 px-4 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="unsaved-template-design-title"
+          aria-describedby="unsaved-template-design-description"
+        >
+          <div className="surface-card w-full max-w-lg rounded-[30px] border p-6 shadow-soft">
+            <h2 id="unsaved-template-design-title" className="font-display text-2xl font-semibold text-text-primary">
+              Unsaved template design
+            </h2>
+            <p id="unsaved-template-design-description" className="mt-2 text-sm text-text-secondary">
+              You have unsaved changes in this template design. Save them before leaving?
+            </p>
+            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <Button variant="secondary" onClick={() => resolveLeaveConfirmation(true)} disabled={isNavigationSavePending}>
+                Do not Save
+              </Button>
+              <Button onClick={() => void saveAndLeave()} disabled={isNavigationSavePending}>
+                {isNavigationSavePending ? "Saving..." : "Save Design"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
       {isNavigationSavePending && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-text-primary/35 px-4 backdrop-blur-sm" role="status" aria-live="assertive">
           <div className="surface-card flex items-center gap-3 rounded-3xl border px-6 py-5 text-lg font-semibold text-text-primary shadow-soft">

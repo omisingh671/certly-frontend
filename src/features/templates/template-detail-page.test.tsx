@@ -7,7 +7,7 @@ import { api } from "@/api";
 import { TemplateDetailPage } from "./template-detail-page";
 
 const mocks = vi.hoisted(() => ({
-  saveBeforeNavigation: vi.fn(),
+  confirmLeave: vi.fn(),
 }));
 
 vi.mock("./template-design-editor", async () => {
@@ -15,7 +15,7 @@ vi.mock("./template-design-editor", async () => {
 
   return {
     TemplateDesignEditor: React.forwardRef((_props, ref) => {
-      React.useImperativeHandle(ref, () => ({ saveBeforeNavigation: mocks.saveBeforeNavigation }));
+      React.useImperativeHandle(ref, () => ({ confirmLeave: mocks.confirmLeave }));
       return React.createElement("div", null, "Design workspace");
     }),
   };
@@ -37,12 +37,12 @@ describe("template design navigation", () => {
   afterEach(() => {
     cleanup();
     vi.restoreAllMocks();
-    mocks.saveBeforeNavigation.mockReset();
+    mocks.confirmLeave.mockReset();
   });
 
-  it("saves a dirty design before opening the Fields tab", async () => {
+  it("waits for the unsaved-design confirmation before opening the Fields tab", async () => {
     const user = userEvent.setup();
-    mocks.saveBeforeNavigation.mockResolvedValue(true);
+    mocks.confirmLeave.mockResolvedValue(true);
     vi.spyOn(api.templates, "list").mockResolvedValue({
       items: [{ id: "template-1", name: "Professional Certificate", category: "Course" }],
       pagination: { page: 1, limit: 100, total: 1, totalPages: 1 },
@@ -53,13 +53,13 @@ describe("template design navigation", () => {
     expect(await screen.findByText("Design workspace")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Fields" }));
 
-    await waitFor(() => expect(mocks.saveBeforeNavigation).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(mocks.confirmLeave).toHaveBeenCalledTimes(1));
     expect(await screen.findByRole("button", { name: "Add field" })).toBeInTheDocument();
   });
 
-  it("keeps the user on Design when auto-save fails", async () => {
+  it("keeps the user on Design when leaving is cancelled", async () => {
     const user = userEvent.setup();
-    mocks.saveBeforeNavigation.mockResolvedValue(false);
+    mocks.confirmLeave.mockResolvedValue(false);
     vi.spyOn(api.templates, "list").mockResolvedValue({
       items: [{ id: "template-1", name: "Professional Certificate", category: "Course" }],
       pagination: { page: 1, limit: 100, total: 1, totalPages: 1 },
@@ -70,7 +70,7 @@ describe("template design navigation", () => {
     expect(await screen.findByText("Design workspace")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Fields" }));
 
-    await waitFor(() => expect(mocks.saveBeforeNavigation).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(mocks.confirmLeave).toHaveBeenCalledTimes(1));
     expect(screen.getByText("Design workspace")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Add field" })).not.toBeInTheDocument();
   });

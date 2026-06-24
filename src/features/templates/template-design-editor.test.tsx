@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { act, cleanup, render, screen } from "@testing-library/react";
+import { act, cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Link, RouterProvider, createMemoryRouter } from "react-router-dom";
 import { AppProviders } from "@/app/providers";
@@ -59,13 +59,30 @@ const renderEditor = () => {
   );
 };
 
-describe("template design navigation saving", () => {
+describe("template design navigation", () => {
   afterEach(() => {
     cleanup();
     vi.restoreAllMocks();
   });
 
-  it("shows an overlay while a dirty design is saved before route navigation", async () => {
+  it("asks whether to save instead of auto-saving a dirty design before route navigation", async () => {
+    const user = userEvent.setup();
+    prepareEditor();
+    const saveDesign = vi.spyOn(api.templates, "saveDesign").mockResolvedValue(design());
+    renderEditor();
+
+    await user.click(await screen.findByRole("button", { name: "Make design change" }));
+    await user.click(screen.getByRole("link", { name: "Leave editor" }));
+
+    expect(await screen.findByRole("heading", { name: "Unsaved template design" })).toBeInTheDocument();
+    expect(saveDesign).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole("button", { name: "Do not Save" }));
+    expect(await screen.findByText("Other page")).toBeInTheDocument();
+    expect(saveDesign).not.toHaveBeenCalled();
+  });
+
+  it("saves only when Save Design is chosen before route navigation", async () => {
     const user = userEvent.setup();
     prepareEditor();
     let resolveSave: (result: DesignDto) => void;
@@ -77,9 +94,10 @@ describe("template design navigation saving", () => {
 
     await user.click(await screen.findByRole("button", { name: "Make design change" }));
     await user.click(screen.getByRole("link", { name: "Leave editor" }));
+    const confirmationDialog = await screen.findByRole("dialog");
+    await user.click(within(confirmationDialog).getByRole("button", { name: "Save Design" }));
 
     expect(await screen.findByText("Saving template design")).toBeInTheDocument();
-
     await act(async () => resolveSave!(design()));
     expect(await screen.findByText("Other page")).toBeInTheDocument();
   });

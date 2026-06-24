@@ -92,8 +92,8 @@ export const TemplateDetailPage = () => {
     if (nextTab === activeTab) return;
 
     if (activeTab === "design" && nextTab !== "design") {
-      const saved = await (designEditorRef.current?.saveBeforeNavigation() ?? Promise.resolve(true));
-      if (!saved) return;
+      const shouldLeave = await (designEditorRef.current?.confirmLeave() ?? Promise.resolve(true));
+      if (!shouldLeave) return;
     }
 
     setActiveTab(nextTab);
