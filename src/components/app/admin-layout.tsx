@@ -27,6 +27,7 @@ const segmentLabels: Record<string, string> = {
   users: "Users",
   "certificate-audit": "Certificate Audit",
   profile: "Profile",
+  integrations: "Integrations",
 };
 
 const ROLE_LEVEL: Record<UserRole, number> = {
@@ -39,6 +40,7 @@ const navigation = [
   { to: "/templates", label: "Templates" },
   { to: "/batches", label: "Batches" },
   { to: "/notifications", label: "Notifications" },
+  { to: "/integrations", label: "Integrations" },
   { to: "/users", label: "Users", minRole: "SUPER_ADMIN" as const },
   { to: "/sessions", label: "Sessions", minRole: "SUPER_ADMIN" as const },
   {

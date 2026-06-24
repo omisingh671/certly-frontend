@@ -69,6 +69,11 @@ const ProfilePage = lazy(() =>
     default: m.ProfilePage,
   }))
 );
+const IntegrationsPage = lazy(() =>
+  import("@/features/integrations/integrations-page").then((m) => ({
+    default: m.IntegrationsPage,
+  }))
+);
 
 // Super-admin chunk
 const UsersPage = lazy(() =>
@@ -199,6 +204,14 @@ export const router = createBrowserRouter([
             element: (
               <Suspense fallback={fallback}>
                 <ProfilePage />
+              </Suspense>
+            ),
+          },
+          {
+            path: "/integrations",
+            element: (
+              <Suspense fallback={fallback}>
+                <IntegrationsPage />
               </Suspense>
             ),
           },

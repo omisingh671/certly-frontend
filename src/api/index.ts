@@ -25,6 +25,13 @@ import type {
   UserDto,
   UserListDto,
   VerificationResultDto,
+  IntegrationClientDto,
+  IntegrationClientWithKeyDto,
+  ExternalBatchMappingDto,
+  IntegrationEventDto,
+  IntegrationClientListDto,
+  ExternalBatchMappingListDto,
+  IntegrationEventListDto,
 } from "@/api/types";
 
 type BatchListFilters = {
@@ -555,6 +562,107 @@ export const api = {
       } catch (error) {
         throw normalizeApiError(error);
       }
+    },
+  },
+  integrations: {
+    clients: {
+      async list(page = 1, limit = 10) {
+        try {
+          const response = await http.get<IntegrationClientListDto>("/integrations/clients", {
+            params: { page, limit },
+          });
+          return response.data;
+        } catch (error) {
+          throw normalizeApiError(error);
+        }
+      },
+      async create(input: { name: string; type: string }) {
+        try {
+          const response = await http.post<IntegrationClientWithKeyDto>("/integrations/clients", input);
+          return response.data;
+        } catch (error) {
+          throw normalizeApiError(error);
+        }
+      },
+      async update(id: string, input: { name?: string; active?: boolean }) {
+        try {
+          const response = await http.patch<IntegrationClientDto>(`/integrations/clients/${id}`, input);
+          return response.data;
+        } catch (error) {
+          throw normalizeApiError(error);
+        }
+      },
+      async regenerateKey(id: string) {
+        try {
+          const response = await http.post<IntegrationClientWithKeyDto>(`/integrations/clients/${id}/regenerate-key`);
+          return response.data;
+        } catch (error) {
+          throw normalizeApiError(error);
+        }
+      },
+    },
+    mappings: {
+      async list(page = 1, limit = 10, clientId?: string) {
+        try {
+          const response = await http.get<ExternalBatchMappingListDto>("/integrations/batch-mappings", {
+            params: { page, limit, clientId },
+          });
+          return response.data;
+        } catch (error) {
+          throw normalizeApiError(error);
+        }
+      },
+      async create(input: {
+        clientId: string;
+        externalCourseId: string;
+        externalCourseName: string;
+        externalCourseType?: string | null;
+        externalGroupId?: string | null;
+        externalGroupName?: string | null;
+        batchId: string;
+      }) {
+        try {
+          const response = await http.post<ExternalBatchMappingDto>("/integrations/batch-mappings", input);
+          return response.data;
+        } catch (error) {
+          throw normalizeApiError(error);
+        }
+      },
+      async update(id: string, input: { batchId?: string; active?: boolean }) {
+        try {
+          const response = await http.patch<ExternalBatchMappingDto>(`/integrations/batch-mappings/${id}`, input);
+          return response.data;
+        } catch (error) {
+          throw normalizeApiError(error);
+        }
+      },
+      async delete(id: string) {
+        try {
+          await http.delete(`/integrations/batch-mappings/${id}`);
+        } catch (error) {
+          throw normalizeApiError(error);
+        }
+      },
+    },
+    events: {
+      async list(page = 1, limit = 10, filter: { clientId?: string; status?: string; search?: string } = {}) {
+        try {
+          const response = await http.get<IntegrationEventListDto>("/integrations/events", {
+            params: { page, limit, ...filter },
+          });
+          return response.data;
+        } catch (error) {
+          throw normalizeApiError(error);
+        }
+      },
+      async get(id: string) {
+        try {
+          const response = await http.get<IntegrationEventDto>(`/integrations/events/${id}`);
+          return response.data;
+        } catch (error) {
+          throw normalizeApiError(error);
+        }
+      },
     },
   },
 };

@@ -287,3 +287,75 @@ export type LearnerCertificateDto = {
 };
 
 export type LearnerCertificatesDto = { certificates: LearnerCertificateDto[] };
+
+export type IntegrationClientType = "LMS";
+export type IntegrationEventStatus = "RECEIVED" | "SUCCESS" | "FAILED" | "DUPLICATE";
+
+export interface IntegrationClientDto {
+  id: string;
+  name: string;
+  type: IntegrationClientType;
+  apiKeyLast4: string;
+  active: boolean;
+  createdById: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface IntegrationClientWithKeyDto {
+  client: IntegrationClientDto;
+  apiKey: string;
+}
+
+export interface ExternalBatchMappingDto {
+  id: string;
+  clientId: string;
+  externalCourseId: string;
+  externalCourseName: string;
+  externalCourseType: string | null;
+  externalGroupId: string | null;
+  externalGroupName: string | null;
+  batchId: string;
+  batchName?: string;
+  templateName?: string;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface IntegrationEventDto {
+  id: string;
+  clientId: string;
+  clientName?: string;
+  mappingId: string | null;
+  batchId: string | null;
+  externalEventId: string;
+  eventType: string;
+  learnerName: string;
+  learnerEmail: string;
+  externalLearnerId: string;
+  externalCourseId: string;
+  externalGroupId: string | null;
+  payload: Record<string, unknown>;
+  status: IntegrationEventStatus;
+  errorMessage: string | null;
+  certificateId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface IntegrationClientListDto {
+  items: IntegrationClientDto[];
+  pagination: PaginationDto;
+}
+
+export interface ExternalBatchMappingListDto {
+  items: ExternalBatchMappingDto[];
+  pagination: PaginationDto;
+}
+
+export interface IntegrationEventListDto {
+  items: IntegrationEventDto[];
+  pagination: PaginationDto;
+}
+
