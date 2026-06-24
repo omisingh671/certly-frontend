@@ -208,16 +208,16 @@ export const router = createBrowserRouter([
             ),
           },
           {
-            path: "/integrations",
-            element: (
-              <Suspense fallback={fallback}>
-                <IntegrationsPage />
-              </Suspense>
-            ),
-          },
-          {
             element: <RequireRole role="SUPER_ADMIN" />,
             children: [
+              {
+                path: "/integrations",
+                element: (
+                  <Suspense fallback={fallback}>
+                    <IntegrationsPage />
+                  </Suspense>
+                ),
+              },
               {
                 path: "/users",
                 element: (

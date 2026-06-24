@@ -40,7 +40,7 @@ const navigation = [
   { to: "/templates", label: "Templates" },
   { to: "/batches", label: "Batches" },
   { to: "/notifications", label: "Notifications" },
-  { to: "/integrations", label: "Integrations" },
+  { to: "/integrations", label: "Integrations", minRole: "SUPER_ADMIN" as const },
   { to: "/users", label: "Users", minRole: "SUPER_ADMIN" as const },
   { to: "/sessions", label: "Sessions", minRole: "SUPER_ADMIN" as const },
   {
