@@ -1,0 +1,253 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-bg: var(--ds-bg);
+  --color-surface: var(--ds-surface);
+  --color-elevated: var(--ds-elevated);
+  --color-border: var(--ds-border);
+  --color-muted: var(--ds-muted);
+  --color-text-primary: var(--ds-text-primary);
+  --color-text-secondary: var(--ds-text-secondary);
+  --color-primary: var(--ds-primary);
+  --color-primary-hover: var(--ds-primary-hover);
+  --color-primary-soft: var(--ds-primary-soft);
+  --color-primary-foreground: var(--ds-primary-foreground);
+  --color-accent: var(--ds-accent);
+  --color-accent-soft: var(--ds-accent-soft);
+  --color-accent-foreground: var(--ds-accent-foreground);
+  --color-success: var(--ds-success);
+  --color-success-soft: var(--ds-success-soft);
+  --color-danger: var(--ds-danger);
+  --color-danger-soft: var(--ds-danger-soft);
+  --color-warning: var(--ds-warning);
+  --color-warning-soft: var(--ds-warning-soft);
+  --color-info: var(--ds-info);
+  --color-info-soft: var(--ds-info-soft);
+  --font-body: Inter, "Segoe UI", sans-serif;
+  --font-heading: "Plus Jakarta Sans", Inter, sans-serif;
+  --font-sans: var(--font-body);
+  --font-display: var(--font-heading);
+  --shadow-panel: var(--ds-shadow-panel);
+  --shadow-soft: var(--ds-shadow-soft);
+  --background-image-grid: var(--ds-grid);
+}
+
+:root {
+  --ds-bg: #eef4fb;
+  --ds-surface: #ffffff;
+  --ds-elevated: #f7fbff;
+  --ds-border: #cfdae8;
+  --ds-muted: #e7eef7;
+  --ds-text-primary: #132238;
+  --ds-text-secondary: #50627a;
+  --ds-primary: #2563eb;
+  --ds-primary-hover: #1d4ed8;
+  --ds-primary-soft: #dbeafe;
+  --ds-primary-foreground: #ffffff;
+  --ds-accent: #f59e0b;
+  --ds-accent-soft: #fef3c7;
+  --ds-accent-foreground: #3b2600;
+  --ds-success: #059669;
+  --ds-success-soft: #d1fae5;
+  --ds-danger: #dc2626;
+  --ds-danger-soft: #fee2e2;
+  --ds-warning: #d97706;
+  --ds-warning-soft: #fef3c7;
+  --ds-info: #2563eb;
+  --ds-info-soft: #dbeafe;
+  --ds-focus: #2563eb;
+  --ds-shadow-panel: 0 18px 45px rgb(19 34 56 / 0.13);
+  --ds-shadow-soft: 0 10px 30px rgb(19 34 56 / 0.1);
+  --ds-header-bg: linear-gradient(
+    180deg,
+    rgb(15 14 59) 0%,
+    rgb(79 112 153) 45%,
+    rgb(59 130 246 / 0.5) 100%
+  );
+  --ds-grid:
+    linear-gradient(rgb(19 34 56 / 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(19 34 56 / 0.06) 1px, transparent 1px);
+  color: var(--ds-text-primary);
+  background:
+    radial-gradient(
+      circle at top left,
+      rgb(20 184 166 / 0.18),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at top right,
+      rgb(245 158 11 / 0.16),
+      transparent 24%
+    ),
+    linear-gradient(180deg, #f8fbff 0%, var(--ds-bg) 100%);
+  font-family: var(--font-body);
+}
+
+.dark {
+  --ds-bg: #0d1726;
+  --ds-surface: #142238;
+  --ds-elevated: #1b2b44;
+  --ds-border: #31435c;
+  --ds-muted: #20324d;
+  --ds-text-primary: #f5f8fc;
+  --ds-text-secondary: #b8c5d6;
+  --ds-primary: #60a5fa;
+  --ds-primary-hover: #93c5fd;
+  --ds-primary-soft: #16345d;
+  --ds-primary-foreground: #07111f;
+  --ds-accent: #fbbf24;
+  --ds-accent-soft: #463615;
+  --ds-accent-foreground: #1a1202;
+  --ds-success: #34d399;
+  --ds-success-soft: #143f31;
+  --ds-danger: #fb7185;
+  --ds-danger-soft: #4a1d2a;
+  --ds-warning: #fbbf24;
+  --ds-warning-soft: #463615;
+  --ds-info: #7dd3fc;
+  --ds-info-soft: #15384c;
+  --ds-focus: #93c5fd;
+  --ds-shadow-panel: 0 22px 55px rgb(0 0 0 / 0.34);
+  --ds-shadow-soft: 0 12px 34px rgb(0 0 0 / 0.24);
+  --ds-header-bg: linear-gradient(
+    180deg,
+    rgb(15 14 59) 0%,
+    rgb(79 112 153) 45%,
+    rgb(59 130 246 / 0.5) 100%
+  );
+  --ds-grid:
+    linear-gradient(rgb(148 163 184 / 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(148 163 184 / 0.1) 1px, transparent 1px);
+  color: var(--ds-text-primary);
+  background:
+    radial-gradient(
+      circle at top left,
+      rgb(20 184 166 / 0.13),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at top right,
+      rgb(59 130 246 / 0.13),
+      transparent 28%
+    ),
+    linear-gradient(180deg, #07111f 0%, #0f172a 100%);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(
+      circle at top left,
+      rgb(20 184 166 / 0.18),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at top right,
+      rgb(245 158 11 / 0.16),
+      transparent 24%
+    ),
+    linear-gradient(180deg, #f8fbff 0%, var(--ds-bg) 100%);
+  color: var(--ds-text-primary);
+  font-family: var(--font-body);
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
+}
+
+.dark body {
+  background:
+    radial-gradient(
+      circle at top left,
+      rgb(20 184 166 / 0.13),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at top right,
+      rgb(59 130 246 / 0.13),
+      transparent 28%
+    ),
+    linear-gradient(180deg, #07111f 0%, #0f172a 100%);
+  color: var(--ds-text-primary);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+}
+
+#root {
+  min-height: 100vh;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+::selection {
+  background: var(--ds-primary-soft);
+  color: var(--ds-text-primary);
+}
+
+@layer utilities {
+  .font-heading {
+    font-family: var(--font-heading);
+  }
+
+  .font-body {
+    font-family: var(--font-body);
+  }
+
+  .bg-grid {
+    background-image: var(--ds-grid);
+    background-size: 40px 40px;
+  }
+
+  .surface-card {
+    border-color: var(--ds-border);
+    background:
+      linear-gradient(180deg, rgb(255 255 255 / 0.72), rgb(255 255 255 / 0.42)),
+      var(--ds-surface);
+    box-shadow: var(--ds-shadow-panel);
+  }
+
+  .dark .surface-card {
+    background:
+      linear-gradient(180deg, rgb(255 255 255 / 0.05), rgb(255 255 255 / 0.02)),
+      var(--ds-surface);
+  }
+
+  .focus-ring {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+
+  .focus-ring:focus-visible {
+    box-shadow:
+      0 0 0 2px var(--ds-bg),
+      0 0 0 4px var(--ds-focus);
+  }
+}
+
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+
