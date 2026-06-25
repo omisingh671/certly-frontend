@@ -152,30 +152,30 @@ export const BatchesPage = () => {
               <Link
                 key={batch.id}
                 to={`/batches/${batch.id}`}
-                className="group flex items-center gap-4 rounded-[22px] border border-border bg-surface px-5 py-5 transition-colors hover:border-primary/45 hover:bg-elevated"
+                className="group flex flex-col sm:flex-row sm:items-center gap-4 rounded-[22px] border border-border bg-surface px-5 py-5 transition-colors hover:border-primary/45 hover:bg-elevated min-w-0"
               >
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-primary-soft text-primary ">
-                  <GraduationCap className="h-6 w-6" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-display text-xl font-semibold text-text-primary ">{batch.name}</p>
-                  <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-medium text-text-secondary">
-                    <span className="inline-flex items-center gap-1.5">
-                      <FileText className="h-4 w-4 text-text-secondary " />
-                      {formatCertificateCount(batch.totalCount)}
-                    </span>
-                    <span className="inline-flex min-w-0 items-center gap-1.5">
-                      <Layers className="h-4 w-4 shrink-0 text-text-secondary " />
-                      <span className="shrink-0">Template:</span>
-                      <span className="truncate font-semibold text-text-primary ">{batch.templateName}</span>
-                    </span>
+                <div className="flex items-center gap-4 min-w-0 flex-1">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-primary-soft text-primary ">
+                    <GraduationCap className="h-6 w-6" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-display text-xl font-semibold text-text-primary ">{batch.name}</p>
+                    <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-medium text-text-secondary w-full min-w-0">
+                      <span className="inline-flex items-center gap-1.5">
+                        <FileText className="h-4 w-4 text-text-secondary " />
+                        {formatCertificateCount(batch.totalCount)}
+                      </span>
+                      <span className="inline-flex min-w-0 max-w-full items-center gap-1.5">
+                        <Layers className="h-4 w-4 shrink-0 text-text-secondary " />
+                        <span className="shrink-0">Template:</span>
+                        <span className="truncate font-semibold text-text-primary ">{batch.templateName}</span>
+                      </span>
+                    </div>
                   </div>
                 </div>
-                <div className="flex shrink-0 flex-col items-end gap-4">
-                  <span className="inline-flex items-center gap-1 text-sm font-semibold text-primary transition-colors group-hover:text-primary-hover">
-                    View details
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                  </span>
+                <div className="flex shrink-0 items-center justify-start sm:justify-end gap-1 text-sm font-semibold text-primary transition-colors group-hover:text-primary-hover pl-16 sm:pl-0">
+                  <span>View details</span>
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                 </div>
               </Link>
             ))}

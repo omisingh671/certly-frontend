@@ -74,7 +74,7 @@ export const DashboardPage = () => {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4 w-full min-w-0">
         {[
           { label: "Templates", value: templatesTotal, accent: "bg-accent" },
           {
@@ -89,7 +89,7 @@ export const DashboardPage = () => {
             accent: "bg-success",
           },
         ].map((item) => (
-          <Card key={item.label} className="border-border bg-surface">
+          <Card key={item.label} className="border-border bg-surface min-w-0">
             <div className={`mb-4 h-1.5 w-12 rounded-full ${item.accent}`} />
             <p className="text-sm font-medium text-text-secondary">
               {item.label}
@@ -101,9 +101,9 @@ export const DashboardPage = () => {
         ))}
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1.3fr_0.9fr]">
-        <Card>
-          <div className="mb-5 flex items-center justify-between">
+      <div className="grid gap-6 2xl:grid-cols-[1.3fr_0.9fr] w-full min-w-0">
+        <Card className="min-w-0">
+          <div className="mb-5 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-2 lg:gap-4">
             <div>
               <p className="font-display text-2xl font-semibold text-text-primary">
                 Batch quick view
@@ -128,34 +128,34 @@ export const DashboardPage = () => {
                 <Link
                   key={batch.id}
                   to={`/batches/${batch.id}`}
-                  className="group flex items-center gap-4 rounded-3xl border border-border bg-surface px-5 py-5 transition-colors hover:border-primary/45 hover:bg-elevated"
+                  className="group flex flex-col sm:flex-row sm:items-center gap-4 rounded-3xl border border-border bg-surface px-5 py-5 transition-colors hover:border-primary/45 hover:bg-elevated min-w-0"
                 >
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-primary-soft text-primary ">
-                    <GraduationCap className="h-5 w-5" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-display text-xl font-semibold text-text-primary ">
-                      {batch.name}
-                    </p>
-                    <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm font-medium text-text-secondary">
-                      <span className="inline-flex items-center gap-1.5">
-                        <FileText className="h-4 w-4 text-text-secondary " />
-                        {formatCertificateCount(batch.totalCount)}
-                      </span>
-                      <span className="inline-flex min-w-0 items-center gap-1.5">
-                        <Layers className="h-4 w-4 shrink-0 text-text-secondary " />
-                        <span className="shrink-0">Template:</span>
-                        <span className="truncate font-semibold text-text-primary ">
-                          {batch.templateName}
+                  <div className="flex items-center gap-4 min-w-0 flex-1">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-primary-soft text-primary ">
+                      <GraduationCap className="h-5 w-5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-display text-xl font-semibold text-text-primary ">
+                        {batch.name}
+                      </p>
+                      <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm font-medium text-text-secondary w-full min-w-0">
+                        <span className="inline-flex items-center gap-1.5">
+                          <FileText className="h-4 w-4 text-text-secondary " />
+                          {formatCertificateCount(batch.totalCount)}
                         </span>
-                      </span>
+                        <span className="inline-flex min-w-0 max-w-full items-center gap-1.5">
+                          <Layers className="h-4 w-4 shrink-0 text-text-secondary " />
+                          <span className="shrink-0">Template:</span>
+                          <span className="truncate font-semibold text-text-primary ">
+                            {batch.templateName}
+                          </span>
+                        </span>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex shrink-0 flex-col items-end gap-3">
-                    <span className="inline-flex items-center gap-1 text-sm font-semibold text-primary transition-colors group-hover:text-primary-hover">
-                      View details
-                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                    </span>
+                  <div className="flex shrink-0 items-center justify-start sm:justify-end gap-1 text-sm font-semibold text-primary transition-colors group-hover:text-primary-hover pl-16 sm:pl-0">
+                    <span>View details</span>
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                   </div>
                 </Link>
               ))
@@ -163,8 +163,8 @@ export const DashboardPage = () => {
           </div>
         </Card>
 
-        <Card>
-          <div className="mb-5 flex items-center justify-between">
+        <Card className="hidden lg:block min-w-0">
+          <div className="mb-5 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-2 lg:gap-4">
             <div>
               <p className="font-display text-2xl font-semibold text-text-primary">
                 Notifications
@@ -193,13 +193,15 @@ export const DashboardPage = () => {
                   key={notification.id}
                   className="rounded-[22px] bg-elevated p-4"
                 >
-                  <div className="flex items-center justify-between gap-4">
-                    <p className="text-sm font-semibold leading-6 text-text-primary">
+                  <div className="flex items-start justify-between gap-4">
+                    <p className="text-sm font-semibold leading-6 text-text-primary min-w-0 flex-1">
                       {notification.message}
                     </p>
-                    <Badge tone={notificationToneByType[notification.type]}>
-                      {notification.type}
-                    </Badge>
+                    <span className="shrink-0">
+                      <Badge tone={notificationToneByType[notification.type]}>
+                        {notification.type}
+                      </Badge>
+                    </span>
                   </div>
                 </div>
               ))
@@ -213,8 +215,8 @@ export const DashboardPage = () => {
         </Card>
       </div>
 
-      <Card>
-        <div className="mb-5 flex items-center justify-between gap-4">
+      <Card className="min-w-0">
+        <div className="mb-5 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-2 lg:gap-4">
           <div>
             <p className="font-display text-2xl font-semibold text-text-primary">
               Recently used templates
@@ -232,18 +234,18 @@ export const DashboardPage = () => {
         </div>
 
         {templatesQuery.isLoading ? (
-          <div className="grid gap-4 lg:grid-cols-3">
+          <div className="grid gap-4 lg:grid-cols-3 w-full min-w-0">
             <Skeleton className="h-36" />
             <Skeleton className="h-36" />
             <Skeleton className="h-36" />
           </div>
         ) : recentUsedTemplates.length ? (
-          <div className="grid gap-4 lg:grid-cols-3">
+          <div className="grid gap-4 lg:grid-cols-3 w-full min-w-0">
             {recentUsedTemplates.map((template) => (
               <Link
                 key={template.id}
                 to={`/templates/${template.id}`}
-                className="group rounded-3xl border border-border bg-surface p-5 transition-colors hover:border-primary/45 hover:bg-elevated"
+                className="group rounded-3xl border border-border bg-surface p-5 transition-colors hover:border-primary/45 hover:bg-elevated min-w-0"
               >
                 <div className="mb-5 flex items-start justify-between gap-4">
                   <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-soft text-primary">

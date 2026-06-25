@@ -1,4 +1,4 @@
-import { FormEvent, useState, useEffect } from "react";
+import { FormEvent, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Layers, Plus, Trash2 } from "lucide-react";
 import { api } from "@/api";
@@ -14,11 +14,7 @@ import { Toggle } from "@/components/ui/toggle";
 import { useToast } from "@/components/ui/toast";
 import { useQueryErrorToast } from "@/lib/use-query-error-toast";
 
-interface MappingsTabProps {
-  onAddMappingTrigger?: (trigger: () => void) => void;
-}
-
-export const MappingsTab = ({ onAddMappingTrigger }: MappingsTabProps) => {
+export const MappingsTab = () => {
   const queryClient = useQueryClient();
   const { pushToast } = useToast();
 
@@ -35,12 +31,6 @@ export const MappingsTab = ({ onAddMappingTrigger }: MappingsTabProps) => {
   const [mappingExtGroupId, setMappingExtGroupId] = useState("");
   const [mappingExtGroupName, setMappingExtGroupName] = useState("");
   const [mappingBatchId, setMappingBatchId] = useState("");
-
-  useEffect(() => {
-    if (onAddMappingTrigger) {
-      onAddMappingTrigger(() => setMappingModalOpen(true));
-    }
-  }, [onAddMappingTrigger]);
 
   // Load clients for the dropdown filters (non-paginated or max limit 100)
   const clientsListQuery = useQuery({
@@ -125,7 +115,7 @@ export const MappingsTab = ({ onAddMappingTrigger }: MappingsTabProps) => {
   return (
     <div className="space-y-4">
       {/* Mapping filters */}
-      <Card className="flex flex-wrap items-end gap-4 p-4">
+      <Card className="flex flex-wrap items-end justify-between gap-4 p-4">
         <div className="w-64">
           <Field label="Filter by LMS Client">
             <Select
@@ -144,6 +134,10 @@ export const MappingsTab = ({ onAddMappingTrigger }: MappingsTabProps) => {
             </Select>
           </Field>
         </div>
+        <Button onClick={() => setMappingModalOpen(true)} className="shrink-0">
+          <Plus className="mr-2 h-4 w-4" />
+          <span>Create Mapping</span>
+        </Button>
       </Card>
 
       {/* Mappings Table */}

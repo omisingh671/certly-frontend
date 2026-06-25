@@ -9,19 +9,21 @@ export const Tabs = <T extends string>({
   items,
   value,
   onChange,
+  className,
 }: {
   items: TabItem<T>[];
   value: T;
   onChange: (value: T) => void;
+  className?: string;
 }) => (
-  <div className="inline-flex rounded-full bg-surface p-1 ring-1 ring-border shadow-soft">
+  <div className={cn("inline-flex rounded-full bg-surface p-1 ring-1 ring-border shadow-soft max-w-full overflow-x-auto no-scrollbar", className)}>
     {items.map((item) => (
       <button
         key={item.value}
         type="button"
         onClick={() => onChange(item.value)}
         className={cn(
-          "focus-ring cursor-pointer rounded-full px-4 py-2 text-sm font-semibold transition",
+          "focus-ring cursor-pointer rounded-full px-4 py-2 text-sm font-semibold transition shrink-0",
           value === item.value
             ? "bg-primary text-primary-foreground"
             : "text-text-secondary hover:bg-elevated hover:text-text-primary",

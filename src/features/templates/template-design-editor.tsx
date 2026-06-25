@@ -630,543 +630,605 @@ export const TemplateDesignEditor = forwardRef<TemplateDesignEditorHandle, Templ
   }
 
   return (
-    <div className="space-y-5">
-      {!embedded ? (
-        <Card>
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <p className="font-display text-3xl font-semibold text-text-primary">Template design</p>
-              <p className="text-sm text-text-secondary">Visual layout editor backed by saved layout JSON.</p>
-            </div>
-            <Button variant="success" onClick={() => saveDesignMutation.mutate()} disabled={saveDesignMutation.isPending || !!jsonError}>
-              <Save className="h-4 w-4" />
-              {saveDesignMutation.isPending ? "Saving..." : "Save"}
-            </Button>
+    <>
+      {/* Warning message for screen width < 1024px */}
+      <div className="block lg:hidden">
+        <Card className="flex flex-col items-center justify-center text-center p-8 space-y-5 rounded-[30px] border border-border bg-surface shadow-soft max-w-md mx-auto min-h-[350px]">
+          <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-warning-soft text-warning">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={2}
+              stroke="currentColor"
+              className="h-8 w-8"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25"
+              />
+            </svg>
+            <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-danger text-white ring-2 ring-surface text-xs font-bold">
+              !
+            </span>
+          </div>
+          <div className="space-y-2">
+            <h3 className="font-display text-xl font-bold text-text-primary">
+              Larger Screen Required
+            </h3>
+            <p className="text-sm leading-relaxed text-text-secondary">
+              Designing templates is not supported on smaller screen sizes. Please open this page on a larger screen (1024px or wider) to design your template.
+            </p>
           </div>
         </Card>
-      ) : null}
-
-      <div>
-        <div className="grid gap-3">
-          <div className="min-w-0 overflow-hidden rounded-2xl border border-border bg-elevated">
-            <input
-              ref={imageFileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              className="hidden"
-              onChange={handleImageFileChange}
-            />
-            <div className="flex min-w-0 flex-wrap items-center gap-3 border-b border-border bg-muted p-3">
-              <ToolbarToggle
-                label="Show Rulers"
-                checked={showRulers}
-                onChange={() => setShowRulers((current) => !current)}
-              />
-              <ToolbarToggle label="Show Grid" checked={showGrid} onChange={() => setShowGrid((current) => !current)} />
-              <ToolbarToggle label="Snap Grid" checked={snapToGrid} onChange={() => setSnapToGrid((current) => !current)} />
-              <ToolbarToggle
-                label="Snap Guides"
-                checked={snapToGuides}
-                onChange={() => setSnapToGuides((current) => !current)}
-              />
-            </div>
-            <div className="flex min-w-0 flex-wrap items-center gap-3 p-3">
-              <Button className="h-8 px-2.5 text-xs" variant="secondary" onClick={() => addBlock("text")}>
-                <Type className="h-4 w-4" />
-                <span>Text</span>
-              </Button>
-              <Button
-                className="h-8 px-2.5 text-xs"
-                variant="secondary"
-                onClick={() => addBlock("field")}
-                disabled={fields.length === 0}
-              >
-                <Variable className="h-4 w-4" />
-                <span>Field</span>
-              </Button>
-              <Button className="h-8 px-2.5 text-xs" variant="secondary" onClick={() => addBlock("line")}>
-                <Minus className="h-4 w-4" />
-                <span>Line</span>
-              </Button>
-              <Button className="h-8 px-2.5 text-xs" variant="secondary" onClick={() => addBlock("rect")}>
-                <Square className="h-4 w-4" />
-                <span>Rect</span>
-              </Button>
-              <Button className="h-8 px-2.5 text-xs" variant="secondary" onClick={() => addBlock("qr")}>
-                <QrCode className="h-4 w-4" />
-                <span>QR</span>
-              </Button>
-              <Button className="h-8 px-2.5 text-xs" variant="secondary" onClick={() => addBlock("qrCode")}>
-                <KeyRound className="h-4 w-4" />
-                <span>Code</span>
-              </Button>
-              <Button
-                className="h-8 px-2.5 text-xs"
-                variant="secondary"
-                onClick={() => imageFileInputRef.current?.click()}
-                disabled={uploadDesignImageMutation.isPending}
-              >
-                <ImageIcon className="h-4 w-4" />
-                <span>{uploadDesignImageMutation.isPending ? "Uploading" : "Image"}</span>
-              </Button>
-              <div className="inline-flex h-8 overflow-hidden rounded-2xl bg-surface ring-1 ring-border">
-                <Button
-                  className="h-8 rounded-none px-2.5 text-xs ring-0 hover:bg-elevated"
-                  variant="ghost"
-                  onClick={undoLayoutChange}
-                  disabled={historyPast.length === 0}
-                  aria-label="Undo"
-                  title="Undo"
-                >
-                  <RotateCcw className="h-4 w-4" />
-                </Button>
-                <div className="my-2 w-px bg-muted" />
-                <Button
-                  className="h-8 rounded-none px-2.5 text-xs ring-0 hover:bg-elevated"
-                  variant="ghost"
-                  onClick={redoLayoutChange}
-                  disabled={historyFuture.length === 0}
-                  aria-label="Redo"
-                  title="Redo"
-                >
-                  <RotateCw className="h-4 w-4" />
-                </Button>
-                <div className="my-2 w-px bg-muted" />
-                <Button
-                  className="h-8 rounded-none px-2.5 text-xs ring-0 hover:bg-elevated"
-                  variant="ghost"
-                  onClick={duplicateSelectedBlocks}
-                  disabled={selectedBlockIds.length === 0}
-                  aria-label="Duplicate"
-                  title="Duplicate"
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </div>
-              <div className="inline-flex h-8 overflow-hidden rounded-2xl bg-surface ring-1 ring-border">
-                <Button
-                  className="h-8 rounded-none px-2.5 text-xs ring-0 hover:bg-elevated"
-                  variant="ghost"
-                  onClick={groupSelectedBlocks}
-                  disabled={!canGroupSelection}
-                >
-                  <Group className="h-4 w-4" />
-                  <span>Group</span>
-                </Button>
-                <div className="my-2 w-px bg-muted" />
-                <Button
-                  className="h-8 rounded-none px-2.5 text-xs ring-0 hover:bg-elevated"
-                  variant="ghost"
-                  onClick={ungroupSelectedBlocks}
-                  disabled={!canUngroupSelection}
-                >
-                  <Ungroup className="h-4 w-4" />
-                  <span>Ungroup</span>
-                </Button>
-              </div>
-              <div className="inline-flex h-8 overflow-hidden rounded-2xl bg-surface ring-1 ring-border">
-                <Button
-                  className="h-8 rounded-none px-2.5 text-xs ring-0 hover:bg-elevated"
-                  variant="ghost"
-                  onClick={sendSelectedBlocksToBack}
-                  disabled={selectedBlockIds.length === 0}
-                >
-                  <SendToBack className="h-4 w-4" />
-                  <span>Back</span>
-                </Button>
-                <div className="my-2 w-px bg-muted" />
-                <Button
-                  className="h-8 rounded-none px-2.5 text-xs ring-0 hover:bg-elevated"
-                  variant="ghost"
-                  onClick={bringSelectedBlocksToFront}
-                  disabled={selectedBlockIds.length === 0}
-                >
-                  <BringToFront className="h-4 w-4" />
-                  <span>Front</span>
-                </Button>
-              </div>
-              <Button
-                className="h-8 px-2.5 text-xs"
-                variant="secondary"
-                onClick={toggleLockSelectedBlocks}
-                disabled={selectedBlockIds.length === 0}
-                aria-label={selectedBlocks.some((b) => b.isLocked) ? "Unlock Selected Elements" : "Lock Selected Elements"}
-                title={selectedBlocks.some((b) => b.isLocked) ? "Unlock" : "Lock"}
-              >
-                {selectedBlocks.some((b) => b.isLocked) ? (
-                  <>
-                    <Unlock className="h-4 w-4" />
-                    <span>Unlock</span>
-                  </>
-                ) : (
-                  <>
-                    <Lock className="h-4 w-4" />
-                    <span>Lock</span>
-                  </>
-                )}
-              </Button>
-              <Button
-                className="h-8 px-2.5 text-xs"
-                variant="danger-soft"
-                onClick={deleteSelectedBlocks}
-                disabled={selectedBlockIds.length === 0 || selectedBlocks.some((b) => b.isLocked)}
-                aria-label="Delete Selected Element"
-                title="Delete Selected Element"
-              >
-                <Trash2 className="h-4 w-4" />
-                <span>Delete</span>
-              </Button>
-            </div>
-          </div>
-        </div>
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
-        <Card className="min-w-0">
-          <DesignCanvas
-            layout={layout}
-            fields={fields}
-            editable
-            selectedBlockIds={selectedBlockIds}
-            showRulers={showRulers}
-            showGrid={showGrid}
-            snapToGrid={snapToGrid}
-            snapToGuides={snapToGuides}
-            onSelectBlock={selectBlock}
-            onChangeLayout={commitLayout}
-          />
-          <div
-            className={`mt-4 flex items-center justify-center rounded-2xl border px-4 py-3 text-sm font-semibold ${
-              hasUnsavedChanges
-                ? "border-warning/30 bg-accent-soft text-warning"
-                : "border-success/25 bg-success-soft/35 text-success"
-            }`}
-            role="status"
-            aria-live="polite"
-          >
-            {hasUnsavedChanges ? "Unsaved changes" : "All changes saved"}
-          </div>
-        </Card>
-
-        <Card className="space-y-4">
-          <Button
-            variant="success"
-            className="w-full h-11"
-            onClick={() => void persistDesign()}
-            disabled={saveDesignMutation.isPending || !!jsonError}
-          >
-            <Save className="h-4 w-4" />
-            <span>{saveDesignMutation.isPending ? "Saving..." : "Save Design"}</span>
-          </Button>
-
-          <div className="rounded-3xl border border-border bg-elevated dark:border-border dark:bg-surface/75">
-            <button
-              type="button"
-              className="flex w-full items-center justify-between px-4 py-3 text-left"
-              onClick={() => setPageSettingsOpen((current) => !current)}
-            >
-              <span>
-                <span className="block text-xs font-semibold uppercase tracking-wide text-text-secondary">Page Settings</span>
-                <span className="text-sm font-semibold text-text-primary">
-                  {layout.page.orientation} · {layout.page.width} x {layout.page.height}
-                </span>
-              </span>
-              {pageSettingsOpen ? (
-                <ChevronDown className="h-4 w-4 text-text-secondary" />
-              ) : (
-                <ChevronRight className="h-4 w-4 text-text-secondary" />
-              )}
-            </button>
-
-            {pageSettingsOpen ? (
-              <div className="space-y-4 border-t border-border px-4 py-4 dark:border-border">
-                <Field label="Orientation">
-                  <Select
-                    value={layout.page.orientation}
-                    onChange={(event) => updatePageOrientation(event.target.value as TemplatePageOrientation)}
-                  >
-                    <option value="landscape">Landscape</option>
-                    <option value="portrait">Portrait</option>
-                  </Select>
-                </Field>
-                <div className="grid grid-cols-2 gap-3">
-                  <Field label="Width">
-                    <Input
-                      type="number"
-                      min={1}
-                      value={layout.page.width}
-                      onChange={(event) =>
-                        updatePage({ width: numberFromInput(event.target.value, layout.page.width) })
-                      }
-                    />
-                  </Field>
-                  <Field label="Height">
-                    <Input
-                      type="number"
-                      min={1}
-                      value={layout.page.height}
-                      onChange={(event) =>
-                        updatePage({ height: numberFromInput(event.target.value, layout.page.height) })
-                      }
-                    />
-                  </Field>
-                </div>
-                <Field label="Background">
-                  <Input
-                    type="color"
-                    className="h-11 p-1"
-                    value={layout.page.background}
-                    onChange={(event) => updatePage({ background: event.target.value })}
-                  />
-                </Field>
+      {/* Main editor workspace visible on lg screens and above */}
+      <div className="hidden lg:block space-y-5">
+        {!embedded ? (
+          <Card>
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <p className="font-display text-3xl font-semibold text-text-primary">Template design</p>
+                <p className="text-sm text-text-secondary">Visual layout editor backed by saved layout JSON.</p>
               </div>
-            ) : null}
-          </div>
-
-          {selectedBlocks.length > 1 ? (
-            <div className="space-y-3 rounded-3xl border border-primary/30 bg-primary-soft/70 p-4 shadow-sm  ">
-              <div className="rounded-2xl bg-surface px-3 py-2 dark:bg-surface">
-                <p className="text-xs font-semibold uppercase tracking-wide text-primary ">Selected elements</p>
-                <p className="text-sm font-semibold text-text-primary ">{selectedBlocks.length} items selected</p>
-              </div>
-              <p className="text-sm leading-6 text-text-secondary dark:text-text-secondary">
-                Move selected items with drag or arrow keys. Use Group to keep them together, or Ungroup to edit grouped
-                items separately.
-              </p>
+              <Button variant="success" onClick={() => saveDesignMutation.mutate()} disabled={saveDesignMutation.isPending || !!jsonError}>
+                <Save className="h-4 w-4" />
+                {saveDesignMutation.isPending ? "Saving..." : "Save"}
+              </Button>
             </div>
-          ) : selectedBlock ? (
-            <div className="space-y-4 rounded-3xl border border-primary/30 bg-primary-soft/70 p-4 shadow-sm dark:border-primary/30 ">
-              <div className="flex items-center justify-between rounded-2xl bg-surface px-3 py-2 dark:bg-surface">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-primary ">Selected element</p>
-                  <p className="text-sm font-semibold text-text-primary ">{selectedBlock.type}</p>
+          </Card>
+        ) : null}
+
+        <div>
+          <div className="grid gap-3">
+            <div className="min-w-0 overflow-hidden rounded-2xl border border-border bg-elevated">
+              <input
+                ref={imageFileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={handleImageFileChange}
+              />
+              <div className="flex min-w-0 flex-wrap items-center gap-3 border-b border-border bg-muted p-3">
+                <ToolbarToggle
+                  label="Show Rulers"
+                  checked={showRulers}
+                  onChange={() => setShowRulers((current) => !current)}
+                />
+                <ToolbarToggle label="Show Grid" checked={showGrid} onChange={() => setShowGrid((current) => !current)} />
+                <ToolbarToggle label="Snap Grid" checked={snapToGrid} onChange={() => setSnapToGrid((current) => !current)} />
+                <ToolbarToggle
+                  label="Snap Guides"
+                  checked={snapToGuides}
+                  onChange={() => setSnapToGuides((current) => !current)}
+                />
+              </div>
+              <div className="flex min-w-0 flex-wrap items-center gap-3 p-3">
+                <Button className="h-8 px-2.5 text-xs" variant="secondary" onClick={() => addBlock("text")}>
+                  <Type className="h-4 w-4" />
+                  <span>Text</span>
+                </Button>
+                <Button
+                  className="h-8 px-2.5 text-xs"
+                  variant="secondary"
+                  onClick={() => addBlock("field")}
+                  disabled={fields.length === 0}
+                >
+                  <Variable className="h-4 w-4" />
+                  <span>Field</span>
+                </Button>
+                <Button className="h-8 px-2.5 text-xs" variant="secondary" onClick={() => addBlock("line")}>
+                  <Minus className="h-4 w-4" />
+                  <span>Line</span>
+                </Button>
+                <Button className="h-8 px-2.5 text-xs" variant="secondary" onClick={() => addBlock("rect")}>
+                  <Square className="h-4 w-4" />
+                  <span>Rect</span>
+                </Button>
+                <Button className="h-8 px-2.5 text-xs" variant="secondary" onClick={() => addBlock("qr")}>
+                  <QrCode className="h-4 w-4" />
+                  <span>QR</span>
+                </Button>
+                <Button className="h-8 px-2.5 text-xs" variant="secondary" onClick={() => addBlock("qrCode")}>
+                  <KeyRound className="h-4 w-4" />
+                  <span>Code</span>
+                </Button>
+                <Button
+                  className="h-8 px-2.5 text-xs"
+                  variant="secondary"
+                  onClick={() => imageFileInputRef.current?.click()}
+                  disabled={uploadDesignImageMutation.isPending}
+                >
+                  <ImageIcon className="h-4 w-4" />
+                  <span>{uploadDesignImageMutation.isPending ? "Uploading" : "Image"}</span>
+                </Button>
+                <div className="inline-flex h-8 overflow-hidden rounded-2xl bg-surface ring-1 ring-border">
+                  <Button
+                    className="h-8 rounded-none px-2.5 text-xs ring-0 hover:bg-elevated"
+                    variant="ghost"
+                    onClick={undoLayoutChange}
+                    disabled={historyPast.length === 0}
+                    aria-label="Undo"
+                    title="Undo"
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                  </Button>
+                  <div className="my-2 w-px bg-muted" />
+                  <Button
+                    className="h-8 rounded-none px-2.5 text-xs ring-0 hover:bg-elevated"
+                    variant="ghost"
+                    onClick={redoLayoutChange}
+                    disabled={historyFuture.length === 0}
+                    aria-label="Redo"
+                    title="Redo"
+                  >
+                    <RotateCw className="h-4 w-4" />
+                  </Button>
+                  <div className="my-2 w-px bg-muted" />
+                  <Button
+                    className="h-8 rounded-none px-2.5 text-xs ring-0 hover:bg-elevated"
+                    variant="ghost"
+                    onClick={duplicateSelectedBlocks}
+                    disabled={selectedBlockIds.length === 0}
+                    aria-label="Duplicate"
+                    title="Duplicate"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="inline-flex h-8 overflow-hidden rounded-2xl bg-surface ring-1 ring-border">
+                  <Button
+                    className="h-8 rounded-none px-2.5 text-xs ring-0 hover:bg-elevated"
+                    variant="ghost"
+                    onClick={groupSelectedBlocks}
+                    disabled={!canGroupSelection}
+                  >
+                    <Group className="h-4 w-4" />
+                    <span>Group</span>
+                  </Button>
+                  <div className="my-2 w-px bg-muted" />
+                  <Button
+                    className="h-8 rounded-none px-2.5 text-xs ring-0 hover:bg-elevated"
+                    variant="ghost"
+                    onClick={ungroupSelectedBlocks}
+                    disabled={!canUngroupSelection}
+                  >
+                    <Ungroup className="h-4 w-4" />
+                    <span>Ungroup</span>
+                  </Button>
+                </div>
+                <div className="inline-flex h-8 overflow-hidden rounded-2xl bg-surface ring-1 ring-border">
+                  <Button
+                    className="h-8 rounded-none px-2.5 text-xs ring-0 hover:bg-elevated"
+                    variant="ghost"
+                    onClick={sendSelectedBlocksToBack}
+                    disabled={selectedBlockIds.length === 0}
+                  >
+                    <SendToBack className="h-4 w-4" />
+                    <span>Back</span>
+                  </Button>
+                  <div className="my-2 w-px bg-muted" />
+                  <Button
+                    className="h-8 rounded-none px-2.5 text-xs ring-0 hover:bg-elevated"
+                    variant="ghost"
+                    onClick={bringSelectedBlocksToFront}
+                    disabled={selectedBlockIds.length === 0}
+                  >
+                    <BringToFront className="h-4 w-4" />
+                    <span>Front</span>
+                  </Button>
                 </div>
                 <Button
-                  variant={selectedBlock.isLocked ? "danger" : "secondary"}
                   className="h-8 px-2.5 text-xs"
+                  variant="secondary"
                   onClick={toggleLockSelectedBlocks}
+                  disabled={selectedBlockIds.length === 0}
+                  aria-label={selectedBlocks.some((b) => b.isLocked) ? "Unlock Selected Elements" : "Lock Selected Elements"}
+                  title={selectedBlocks.some((b) => b.isLocked) ? "Unlock" : "Lock"}
                 >
-                  {selectedBlock.isLocked ? (
+                  {selectedBlocks.some((b) => b.isLocked) ? (
                     <>
-                      <Unlock className="h-3.5 w-3.5 mr-1" />
+                      <Unlock className="h-4 w-4" />
                       <span>Unlock</span>
                     </>
                   ) : (
                     <>
-                      <Lock className="h-3.5 w-3.5 mr-1" />
+                      <Lock className="h-4 w-4" />
                       <span>Lock</span>
                     </>
                   )}
                 </Button>
+                <Button
+                  className="h-8 px-2.5 text-xs"
+                  variant="danger-soft"
+                  onClick={deleteSelectedBlocks}
+                  disabled={selectedBlockIds.length === 0 || selectedBlocks.some((b) => b.isLocked)}
+                  aria-label="Delete Selected Element"
+                  title="Delete Selected Element"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  <span>Delete</span>
+                </Button>
               </div>
+            </div>
+          </div>
+        </div>
 
-              {selectedBlock.type === "text" ? (
-                <div className="space-y-3">
-                  <Field label="Text">
-                    <Textarea
-                      ref={textBlockTextareaRef}
-                      className="min-h-[132px] resize-y"
-                      value={selectedBlock.text ?? ""}
-                      onChange={(event) => updateSelectedBlock({ text: event.target.value })}
-                    />
-                  </Field>
-                  <Field label="Insert field">
-                    <Select value="" onChange={(event) => insertFieldIntoSelectedText(event.target.value)}>
-                      <option value="">Select field</option>
-                      {fields.map((field) => (
-                        <option key={field.id} value={field.name}>
-                          {field.name}
-                        </option>
-                      ))}
+        <div className="grid gap-5 grid-cols-1 2xl:grid-cols-[minmax(0,1fr)_340px]">
+          <Card className="min-w-0">
+            <DesignCanvas
+              layout={layout}
+              fields={fields}
+              editable
+              selectedBlockIds={selectedBlockIds}
+              showRulers={showRulers}
+              showGrid={showGrid}
+              snapToGrid={snapToGrid}
+              snapToGuides={snapToGuides}
+              onSelectBlock={selectBlock}
+              onChangeLayout={commitLayout}
+            />
+            <div
+              className={`mt-4 flex items-center justify-center rounded-2xl border px-4 py-3 text-sm font-semibold ${
+                hasUnsavedChanges
+                  ? "border-warning/30 bg-accent-soft text-warning"
+                  : "border-success/25 bg-success-soft/35 text-success"
+              }`}
+              role="status"
+              aria-live="polite"
+            >
+              {hasUnsavedChanges ? "Unsaved changes" : "All changes saved"}
+            </div>
+          </Card>
+
+          <Card className="space-y-4">
+            <Button
+              variant="success"
+              className="w-full h-11"
+              onClick={() => void persistDesign()}
+              disabled={saveDesignMutation.isPending || !!jsonError}
+            >
+              <Save className="h-4 w-4" />
+              <span>{saveDesignMutation.isPending ? "Saving..." : "Save Design"}</span>
+            </Button>
+
+            <div className="rounded-3xl border border-border bg-elevated dark:border-border dark:bg-surface/75">
+              <button
+                type="button"
+                className="flex w-full items-center justify-between px-4 py-3 text-left"
+                onClick={() => setPageSettingsOpen((current) => !current)}
+              >
+                <span>
+                  <span className="block text-xs font-semibold uppercase tracking-wide text-text-secondary">Page Settings</span>
+                  <span className="text-sm font-semibold text-text-primary">
+                    {layout.page.orientation} · {layout.page.width} x {layout.page.height}
+                  </span>
+                </span>
+                {pageSettingsOpen ? (
+                  <ChevronDown className="h-4 w-4 text-text-secondary" />
+                ) : (
+                  <ChevronRight className="h-4 w-4 text-text-secondary" />
+                )}
+              </button>
+
+              {pageSettingsOpen ? (
+                <div className="space-y-4 border-t border-border px-4 py-4 dark:border-border">
+                  <Field label="Orientation">
+                    <Select
+                      value={layout.page.orientation}
+                      onChange={(event) => updatePageOrientation(event.target.value as TemplatePageOrientation)}
+                    >
+                      <option value="landscape">Landscape</option>
+                      <option value="portrait">Portrait</option>
                     </Select>
+                  </Field>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Field label="Width">
+                      <Input
+                        type="number"
+                        min={1}
+                        value={layout.page.width}
+                        onChange={(event) =>
+                          updatePage({ width: numberFromInput(event.target.value, layout.page.width) })
+                        }
+                      />
+                    </Field>
+                    <Field label="Height">
+                      <Input
+                        type="number"
+                        min={1}
+                        value={layout.page.height}
+                        onChange={(event) =>
+                          updatePage({ height: numberFromInput(event.target.value, layout.page.height) })
+                        }
+                      />
+                    </Field>
+                  </div>
+                  <Field label="Background">
+                    <Input
+                      type="color"
+                      className="h-11 p-1"
+                      value={layout.page.background}
+                      onChange={(event) => updatePage({ background: event.target.value })}
+                    />
                   </Field>
                 </div>
               ) : null}
+            </div>
 
-              {selectedBlock.type === "field" ? (
-                <>
-                  <Field label="Field key">
-                    <Select
-                      value={selectedBlock.field ?? ""}
-                      onChange={(event) => updateSelectedBlock({ field: event.target.value || null })}
-                    >
-                      <option value="">Select field</option>
-                      {fields.map((field) => (
-                        <option key={field.id} value={field.name}>
-                          {field.name}
-                        </option>
-                      ))}
-                    </Select>
-                  </Field>
+            {selectedBlocks.length > 1 ? (
+              <div className="space-y-3 rounded-3xl border border-primary/30 bg-primary-soft/70 p-4 shadow-sm  ">
+                <div className="rounded-2xl bg-surface px-3 py-2 dark:bg-surface">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-primary ">Selected elements</p>
+                  <p className="text-sm font-semibold text-text-primary ">{selectedBlocks.length} items selected</p>
+                </div>
+                <p className="text-sm leading-6 text-text-secondary dark:text-text-secondary">
+                  Move selected items with drag or arrow keys. Use Group to keep them together, or Ungroup to edit grouped
+                  items separately.
+                </p>
+              </div>
+            ) : selectedBlock ? (
+              <div className="space-y-4 rounded-3xl border border-primary/30 bg-primary-soft/70 p-4 shadow-sm dark:border-primary/30 ">
+                <div className="flex items-center justify-between rounded-2xl bg-surface px-3 py-2 dark:bg-surface">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-primary ">Selected element</p>
+                    <p className="text-sm font-semibold text-text-primary ">{selectedBlock.type}</p>
+                  </div>
+                  <Button
+                    variant={selectedBlock.isLocked ? "danger" : "secondary"}
+                    className="h-8 px-2.5 text-xs"
+                    onClick={toggleLockSelectedBlocks}
+                  >
+                    {selectedBlock.isLocked ? (
+                      <>
+                        <Unlock className="h-3.5 w-3.5 mr-1" />
+                        <span>Unlock</span>
+                      </>
+                    ) : (
+                      <>
+                        <Lock className="h-3.5 w-3.5 mr-1" />
+                        <span>Lock</span>
+                      </>
+                    )}
+                  </Button>
+                </div>
+
+                {selectedBlock.type === "text" ? (
+                  <div className="space-y-3">
+                    <Field label="Text">
+                      <Textarea
+                        ref={textBlockTextareaRef}
+                        className="min-h-[132px] resize-y"
+                        value={selectedBlock.text ?? ""}
+                        onChange={(event) => updateSelectedBlock({ text: event.target.value })}
+                      />
+                    </Field>
+                    <Field label="Insert field">
+                      <Select value="" onChange={(event) => insertFieldIntoSelectedText(event.target.value)}>
+                        <option value="">Select field</option>
+                        {fields.map((field) => (
+                          <option key={field.id} value={field.name}>
+                            {field.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </Field>
+                  </div>
+                ) : null}
+
+                {selectedBlock.type === "field" ? (
+                  <>
+                    <Field label="Field key">
+                      <Select
+                        value={selectedBlock.field ?? ""}
+                        onChange={(event) => updateSelectedBlock({ field: event.target.value || null })}
+                      >
+                        <option value="">Select field</option>
+                        {fields.map((field) => (
+                          <option key={field.id} value={field.name}>
+                            {field.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </Field>
+                    <Field label="Prefix">
+                      <Input
+                        value={selectedBlock.prefix}
+                        onChange={(event) => updateSelectedBlock({ prefix: event.target.value })}
+                      />
+                    </Field>
+                  </>
+                ) : null}
+
+                {selectedBlock.type === "qrCode" ? (
                   <Field label="Prefix">
                     <Input
                       value={selectedBlock.prefix}
                       onChange={(event) => updateSelectedBlock({ prefix: event.target.value })}
                     />
                   </Field>
-                </>
-              ) : null}
+                ) : null}
 
-              {selectedBlock.type === "qrCode" ? (
-                <Field label="Prefix">
-                  <Input
-                    value={selectedBlock.prefix}
-                    onChange={(event) => updateSelectedBlock({ prefix: event.target.value })}
-                  />
-                </Field>
-              ) : null}
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label="X">
+                    <Input
+                      type="number"
+                      disabled={selectedBlock.isLocked}
+                      value={selectedBlock.x}
+                      onChange={(event) =>
+                        updateSelectedBlock({ x: numberFromInput(event.target.value, selectedBlock.x) })
+                      }
+                    />
+                  </Field>
+                  <Field label="Y">
+                    <Input
+                      type="number"
+                      disabled={selectedBlock.isLocked}
+                      value={selectedBlock.y}
+                      onChange={(event) =>
+                        updateSelectedBlock({ y: numberFromInput(event.target.value, selectedBlock.y) })
+                      }
+                    />
+                  </Field>
+                  <Field label="Width">
+                    <Input
+                      type="number"
+                      min={1}
+                      disabled={selectedBlock.isLocked}
+                      value={selectedBlock.width}
+                      onChange={(event) =>
+                        updateSelectedBlock({ width: numberFromInput(event.target.value, selectedBlock.width) })
+                      }
+                    />
+                  </Field>
+                  <Field label="Height">
+                    <Input
+                      type="number"
+                      disabled={selectedBlock.isLocked}
+                      value={selectedBlock.height}
+                      onChange={(event) =>
+                        updateSelectedBlock({ height: numberFromInput(event.target.value, selectedBlock.height) })
+                      }
+                    />
+                  </Field>
+                </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <Field label="X">
-                  <Input
-                    type="number"
-                    disabled={selectedBlock.isLocked}
-                    value={selectedBlock.x}
-                    onChange={(event) =>
-                      updateSelectedBlock({ x: numberFromInput(event.target.value, selectedBlock.x) })
-                    }
-                  />
-                </Field>
-                <Field label="Y">
-                  <Input
-                    type="number"
-                    disabled={selectedBlock.isLocked}
-                    value={selectedBlock.y}
-                    onChange={(event) =>
-                      updateSelectedBlock({ y: numberFromInput(event.target.value, selectedBlock.y) })
-                    }
-                  />
-                </Field>
-                <Field label="Width">
-                  <Input
-                    type="number"
-                    min={1}
-                    disabled={selectedBlock.isLocked}
-                    value={selectedBlock.width}
-                    onChange={(event) =>
-                      updateSelectedBlock({ width: numberFromInput(event.target.value, selectedBlock.width) })
-                    }
-                  />
-                </Field>
-                <Field label="Height">
-                  <Input
-                    type="number"
-                    disabled={selectedBlock.isLocked}
-                    value={selectedBlock.height}
-                    onChange={(event) =>
-                      updateSelectedBlock({ height: numberFromInput(event.target.value, selectedBlock.height) })
-                    }
-                  />
-                </Field>
-              </div>
+                {selectedBlock.type === "image" ? (
+                  <>
+                    <div className="grid grid-cols-2 gap-3">
+                      <Field label="Fit">
+                        <Select
+                          value={selectedBlock.objectFit}
+                          onChange={(event) =>
+                            updateSelectedBlock({
+                              objectFit: event.target.value as TemplateLayoutBlock["objectFit"],
+                            })
+                          }
+                        >
+                          <option value="contain">Contain</option>
+                          <option value="cover">Cover</option>
+                          <option value="stretch">Stretch</option>
+                        </Select>
+                      </Field>
+                      <Field label="Opacity">
+                        <Input
+                          type="number"
+                          min={0}
+                          max={1}
+                          step={0.05}
+                          value={selectedBlock.opacity}
+                          onChange={(event) =>
+                            updateSelectedBlock({
+                              opacity: Math.min(1, Math.max(0, numberFromInput(event.target.value, selectedBlock.opacity))),
+                            })
+                          }
+                        />
+                      </Field>
+                    </div>
+                    <Button className="w-full" variant="secondary" onClick={setSelectedImageAsBackground} disabled={selectedBlock.isLocked}>
+                      Set As Background
+                    </Button>
+                  </>
+                ) : null}
 
-              {selectedBlock.type === "image" ? (
-                <>
-                  <div className="grid grid-cols-2 gap-3">
-                    <Field label="Fit">
-                      <Select
-                        value={selectedBlock.objectFit}
-                        onChange={(event) =>
-                          updateSelectedBlock({
-                            objectFit: event.target.value as TemplateLayoutBlock["objectFit"],
-                          })
-                        }
-                      >
-                        <option value="contain">Contain</option>
-                        <option value="cover">Cover</option>
-                        <option value="stretch">Stretch</option>
-                      </Select>
-                    </Field>
-                    <Field label="Opacity">
+                {selectedBlock.type === "rect" ? (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <Field label="Border color">
+                        <Input
+                          type="color"
+                          className="h-11 p-1"
+                          value={selectedBlock.color}
+                          onChange={(event) => updateSelectedBlock({ color: event.target.value })}
+                        />
+                      </Field>
+                      <Field label="Background color">
+                        <Input
+                          type="color"
+                          className="h-11 p-1"
+                          disabled={selectedBlock.fillColor === "transparent"}
+                          value={selectedBlock.fillColor === "transparent" ? "#ffffff" : selectedBlock.fillColor}
+                          onChange={(event) => updateSelectedBlock({ fillColor: event.target.value })}
+                        />
+                      </Field>
+                    </div>
+                    <Field label="Border width">
                       <Input
                         type="number"
                         min={0}
-                        max={1}
-                        step={0.05}
-                        value={selectedBlock.opacity}
+                        step={1}
+                        value={selectedBlock.borderWidth}
                         onChange={(event) =>
                           updateSelectedBlock({
-                            opacity: Math.min(1, Math.max(0, numberFromInput(event.target.value, selectedBlock.opacity))),
+                            borderWidth: Math.max(
+                              0,
+                              numberFromInput(event.target.value, selectedBlock.borderWidth),
+                            ),
                           })
                         }
                       />
                     </Field>
-                  </div>
-                  <Button className="w-full" variant="secondary" onClick={setSelectedImageAsBackground} disabled={selectedBlock.isLocked}>
-                    Set As Background
-                  </Button>
-                </>
-              ) : null}
-
-              {selectedBlock.type === "rect" ? (
-                <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
-                    <Field label="Border color">
-                      <Input
-                        type="color"
-                        className="h-11 p-1"
-                        value={selectedBlock.color}
-                        onChange={(event) => updateSelectedBlock({ color: event.target.value })}
+                    <label className="flex items-center gap-2 text-sm text-text-secondary">
+                      <input
+                        type="checkbox"
+                        checked={selectedBlock.fillColor === "transparent"}
+                        onChange={(event) =>
+                          updateSelectedBlock({
+                            fillColor: event.target.checked ? "transparent" : "#ffffff",
+                          })
+                        }
                       />
-                    </Field>
-                    <Field label="Background color">
-                      <Input
-                        type="color"
-                        className="h-11 p-1"
-                        disabled={selectedBlock.fillColor === "transparent"}
-                        value={selectedBlock.fillColor === "transparent" ? "#ffffff" : selectedBlock.fillColor}
-                        onChange={(event) => updateSelectedBlock({ fillColor: event.target.value })}
-                      />
-                    </Field>
+                      Transparent background
+                    </label>
                   </div>
-                  <Field label="Border width">
-                    <Input
-                      type="number"
-                      min={0}
-                      step={1}
-                      value={selectedBlock.borderWidth}
-                      onChange={(event) =>
-                        updateSelectedBlock({
-                          borderWidth: Math.max(
-                            0,
-                            numberFromInput(event.target.value, selectedBlock.borderWidth),
-                          ),
-                        })
-                      }
-                    />
-                  </Field>
-                  <label className="flex items-center gap-2 text-sm text-text-secondary">
-                    <input
-                      type="checkbox"
-                      checked={selectedBlock.fillColor === "transparent"}
-                      onChange={(event) =>
-                        updateSelectedBlock({
-                          fillColor: event.target.checked ? "transparent" : "#ffffff",
-                        })
-                      }
-                    />
-                    Transparent background
-                  </label>
-                </div>
-              ) : null}
+                ) : null}
 
-              {selectedBlock.type === "text" || selectedBlock.type === "field" || selectedBlock.type === "qrCode" ? (
-                <>
-                  <Field label="Font family">
-                    <Select
-                      value={selectedBlock.fontFamily}
-                      onChange={(event) => updateSelectedBlock({ fontFamily: event.target.value })}
-                    >
-                      <option value="Inter, Arial, sans-serif">Inter</option>
-                      <option value="&quot;Plus Jakarta Sans&quot;, Inter, sans-serif">Plus Jakarta Sans</option>
-                      <option value="Arial, sans-serif">Arial</option>
-                      <option value="Georgia, serif">Georgia</option>
-                      <option value="&quot;Times New Roman&quot;, Times, serif">Times New Roman</option>
-                    </Select>
-                  </Field>
+                {selectedBlock.type === "text" || selectedBlock.type === "field" || selectedBlock.type === "qrCode" ? (
+                  <>
+                    <Field label="Font family">
+                      <Select
+                        value={selectedBlock.fontFamily}
+                        onChange={(event) => updateSelectedBlock({ fontFamily: event.target.value })}
+                      >
+                        <option value="Inter, Arial, sans-serif">Inter</option>
+                        <option value="&quot;Plus Jakarta Sans&quot;, Inter, sans-serif">Plus Jakarta Sans</option>
+                        <option value="Arial, sans-serif">Arial</option>
+                        <option value="Georgia, serif">Georgia</option>
+                        <option value="&quot;Times New Roman&quot;, Times, serif">Times New Roman</option>
+                      </Select>
+                    </Field>
 
-                  {selectedBlock.type === "text" || selectedBlock.type === "field" ? (
-                    <div className="grid grid-cols-2 gap-3">
+                    {selectedBlock.type === "text" || selectedBlock.type === "field" ? (
+                      <div className="grid grid-cols-2 gap-3">
+                        <Field label="Font size">
+                          <Input
+                            type="number"
+                            min={8}
+                            value={selectedBlock.fontSize}
+                            onChange={(event) =>
+                              updateSelectedBlock({
+                                fontSize: numberFromInput(event.target.value, selectedBlock.fontSize),
+                              })
+                            }
+                          />
+                        </Field>
+                        <Field label="Line height">
+                          <Input
+                            type="number"
+                            min={0.8}
+                            step={0.05}
+                            value={selectedBlock.lineHeight}
+                            onChange={(event) =>
+                              updateSelectedBlock({
+                                lineHeight: numberFromInput(event.target.value, selectedBlock.lineHeight),
+                              })
+                            }
+                          />
+                        </Field>
+                      </div>
+                    ) : (
                       <Field label="Font size">
                         <Input
                           type="number"
@@ -1179,156 +1241,130 @@ export const TemplateDesignEditor = forwardRef<TemplateDesignEditorHandle, Templ
                           }
                         />
                       </Field>
-                      <Field label="Line height">
-                        <Input
-                          type="number"
-                          min={0.8}
-                          step={0.05}
-                          value={selectedBlock.lineHeight}
-                          onChange={(event) =>
-                            updateSelectedBlock({
-                              lineHeight: numberFromInput(event.target.value, selectedBlock.lineHeight),
-                            })
-                          }
-                        />
+                    )}
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <Field label="Font weight">
+                        <Select
+                          value={selectedBlock.fontWeight}
+                          onChange={(event) => updateSelectedBlock({ fontWeight: Number(event.target.value) })}
+                        >
+                          <option value={400}>400</option>
+                          <option value={500}>500</option>
+                          <option value={600}>600</option>
+                          <option value={700}>700</option>
+                        </Select>
+                      </Field>
+                      <Field label="Font style">
+                        <Select
+                          value={selectedBlock.fontStyle}
+                          onChange={(event) => updateSelectedBlock({ fontStyle: event.target.value })}
+                        >
+                          <option value="normal">Normal</option>
+                          <option value="italic">Italic</option>
+                        </Select>
                       </Field>
                     </div>
-                  ) : (
-                    <Field label="Font size">
-                      <Input
-                        type="number"
-                        min={8}
-                        value={selectedBlock.fontSize}
-                        onChange={(event) =>
-                          updateSelectedBlock({
-                            fontSize: numberFromInput(event.target.value, selectedBlock.fontSize),
-                          })
-                        }
-                      />
-                    </Field>
-                  )}
+                    <div className="grid grid-cols-2 gap-3">
+                      <Field label="Alignment">
+                        <Select
+                          value={selectedBlock.align}
+                          onChange={(event) =>
+                            updateSelectedBlock({ align: event.target.value as TemplateTextAlign })
+                          }
+                        >
+                          <option value="left">Left</option>
+                          <option value="center">Center</option>
+                          <option value="right">Right</option>
+                        </Select>
+                      </Field>
+                      <Field label="Vertical alignment">
+                        <Select
+                          value={selectedBlock.verticalAlign}
+                          onChange={(event) =>
+                            updateSelectedBlock({ verticalAlign: event.target.value as TemplateVerticalAlign })
+                          }
+                        >
+                          <option value="top">Top</option>
+                          <option value="center">Center</option>
+                        </Select>
+                      </Field>
+                    </div>
+                  </>
+                ) : null}
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <Field label="Font weight">
-                      <Select
-                        value={selectedBlock.fontWeight}
-                        onChange={(event) => updateSelectedBlock({ fontWeight: Number(event.target.value) })}
-                      >
-                        <option value={400}>400</option>
-                        <option value={500}>500</option>
-                        <option value={600}>600</option>
-                        <option value={700}>700</option>
-                      </Select>
-                    </Field>
-                    <Field label="Font style">
-                      <Select
-                        value={selectedBlock.fontStyle}
-                        onChange={(event) => updateSelectedBlock({ fontStyle: event.target.value })}
-                      >
-                        <option value="normal">Normal</option>
-                        <option value="italic">Italic</option>
-                      </Select>
-                    </Field>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <Field label="Alignment">
-                      <Select
-                        value={selectedBlock.align}
-                        onChange={(event) =>
-                          updateSelectedBlock({ align: event.target.value as TemplateTextAlign })
-                        }
-                      >
-                        <option value="left">Left</option>
-                        <option value="center">Center</option>
-                        <option value="right">Right</option>
-                      </Select>
-                    </Field>
-                    <Field label="Vertical alignment">
-                      <Select
-                        value={selectedBlock.verticalAlign}
-                        onChange={(event) =>
-                          updateSelectedBlock({ verticalAlign: event.target.value as TemplateVerticalAlign })
-                        }
-                      >
-                        <option value="top">Top</option>
-                        <option value="center">Center</option>
-                      </Select>
-                    </Field>
-                  </div>
-                </>
-              ) : null}
+                {selectedBlock.type !== "qr" && selectedBlock.type !== "image" && selectedBlock.type !== "rect" ? (
+                  <Field label="Color">
+                    <Input
+                      type="color"
+                      className="h-11 p-1"
+                      value={selectedBlock.color}
+                      onChange={(event) => updateSelectedBlock({ color: event.target.value })}
+                    />
+                  </Field>
+                ) : null}
+              </div>
+            ) : (
+              <EmptyState title="No element selected" description="Select an element on the canvas to edit it." />
+            )}
+          </Card>
+        </div>
 
-              {selectedBlock.type !== "qr" && selectedBlock.type !== "image" && selectedBlock.type !== "rect" ? (
-                <Field label="Color">
-                  <Input
-                    type="color"
-                    className="h-11 p-1"
-                    value={selectedBlock.color}
-                    onChange={(event) => updateSelectedBlock({ color: event.target.value })}
-                  />
-                </Field>
-              ) : null}
+        <Card>
+          <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="font-display text-xl font-semibold text-text-primary">Layout JSON</p>
+              {jsonError ? <p className="text-sm text-danger">{jsonError}</p> : null}
             </div>
-          ) : (
-            <EmptyState title="No element selected" description="Select an element on the canvas to edit it." />
-          )}
+            <Button
+              variant="secondary"
+              onClick={() => handleJsonEditorChange(formatLayoutJson(layout))}
+            >
+              Normalize JSON
+            </Button>
+          </div>
+          <Textarea
+            className="min-h-[320px] font-mono text-xs"
+            value={designEditorValue}
+            onChange={(event) => handleJsonEditorChange(event.target.value)}
+          />
         </Card>
-      </div>
-
-      <Card>
-        <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <p className="font-display text-xl font-semibold text-text-primary">Layout JSON</p>
-            {jsonError ? <p className="text-sm text-danger">{jsonError}</p> : null}
-          </div>
-          <Button
-            variant="secondary"
-            onClick={() => handleJsonEditorChange(formatLayoutJson(layout))}
+        {leaveConfirmationOpen && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-text-primary/35 px-4 backdrop-blur-sm"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="unsaved-template-design-title"
+            aria-describedby="unsaved-template-design-description"
           >
-            Normalize JSON
-          </Button>
-        </div>
-        <Textarea
-          className="min-h-[320px] font-mono text-xs"
-          value={designEditorValue}
-          onChange={(event) => handleJsonEditorChange(event.target.value)}
-        />
-      </Card>
-      {leaveConfirmationOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-text-primary/35 px-4 backdrop-blur-sm"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="unsaved-template-design-title"
-          aria-describedby="unsaved-template-design-description"
-        >
-          <div className="surface-card w-full max-w-lg rounded-[30px] border p-6 shadow-soft">
-            <h2 id="unsaved-template-design-title" className="font-display text-2xl font-semibold text-text-primary">
-              Unsaved template design
-            </h2>
-            <p id="unsaved-template-design-description" className="mt-2 text-sm text-text-secondary">
-              You have unsaved changes in this template design. Save them before leaving?
-            </p>
-            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-              <Button variant="secondary" onClick={() => resolveLeaveConfirmation(true)} disabled={isNavigationSavePending}>
-                Do not Save
-              </Button>
-              <Button onClick={() => void saveAndLeave()} disabled={isNavigationSavePending}>
-                {isNavigationSavePending ? "Saving..." : "Save Design"}
-              </Button>
+            <div className="surface-card w-full max-w-lg rounded-[30px] border p-6 shadow-soft">
+              <h2 id="unsaved-template-design-title" className="font-display text-2xl font-semibold text-text-primary">
+                Unsaved template design
+              </h2>
+              <p id="unsaved-template-design-description" className="mt-2 text-sm text-text-secondary">
+                You have unsaved changes in this template design. Save them before leaving?
+              </p>
+              <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                <Button variant="secondary" onClick={() => resolveLeaveConfirmation(true)} disabled={isNavigationSavePending}>
+                  Do not Save
+                </Button>
+                <Button onClick={() => void saveAndLeave()} disabled={isNavigationSavePending}>
+                  {isNavigationSavePending ? "Saving..." : "Save Design"}
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-      {isNavigationSavePending && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-text-primary/35 px-4 backdrop-blur-sm" role="status" aria-live="assertive">
-          <div className="surface-card flex items-center gap-3 rounded-3xl border px-6 py-5 text-lg font-semibold text-text-primary shadow-soft">
-            <Loader2 className="size-5 animate-spin text-primary" aria-hidden="true" />
-            Saving template design
+        )}
+        {isNavigationSavePending && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-text-primary/35 px-4 backdrop-blur-sm" role="status" aria-live="assertive">
+            <div className="surface-card flex items-center gap-3 rounded-3xl border px-6 py-5 text-lg font-semibold text-text-primary shadow-soft">
+              <Loader2 className="size-5 animate-spin text-primary" aria-hidden="true" />
+              Saving template design
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </>
   );
 });
 

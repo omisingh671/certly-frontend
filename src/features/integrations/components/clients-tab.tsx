@@ -41,7 +41,7 @@ export const ClientsTab = ({ onAddClientTrigger }: ClientsTabProps) => {
   // Register parent trigger for "+ Add Client" button in header
   useEffect(() => {
     if (onAddClientTrigger) {
-      onAddClientTrigger(() => setClientModalOpen(true));
+      onAddClientTrigger(() => () => setClientModalOpen(true));
     }
   }, [onAddClientTrigger]);
 
@@ -111,69 +111,79 @@ export const ClientsTab = ({ onAddClientTrigger }: ClientsTabProps) => {
           }
         />
       ) : (
-        <Card className="rounded-[30px] p-6 shadow-panel">
-          <div className="mb-5">
-            <p className="font-display text-2xl font-semibold text-text-primary">Integration Clients</p>
-            <p className="text-sm text-text-secondary">
-              These clients can authenticate using API keys to request certificate issuance.
-            </p>
-          </div>
+        <>
+          {/* Client Header Card */}
+          <Card className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p className="font-display text-2xl font-semibold text-text-primary">Integration Clients</p>
+              <p className="text-sm text-text-secondary">
+                These clients can authenticate using API keys to request certificate issuance.
+              </p>
+            </div>
+            <Button onClick={() => setClientModalOpen(true)} className="shrink-0">
+              <Plus className="mr-2 h-4 w-4" />
+              Create Client
+            </Button>
+          </Card>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm border-collapse">
-              <thead>
-                <tr className="border-b border-border text-text-secondary font-medium">
-                  <th className="py-3 px-4">Client Name</th>
-                  <th className="py-3 px-4">Type</th>
-                  <th className="py-3 px-4">API Key Suffix</th>
-                  <th className="py-3 px-4">Active</th>
-                  <th className="py-3 px-4">Created Time</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {allClients.map((client) => (
-                  <tr key={client.id} className="border-b border-border hover:bg-elevated/40">
-                    <td className="py-3.5 px-4 font-semibold text-text-primary">{client.name}</td>
-                    <td className="py-3.5 px-4">
-                      <Badge tone="info">{client.type}</Badge>
-                    </td>
-                    <td className="py-3.5 px-4 font-mono text-xs">••••••••{client.apiKeyLast4}</td>
-                    <td className="py-3.5 px-4">
-                      <Toggle
-                        checked={client.active}
-                        onChange={() =>
-                          toggleClientMutation.mutate({ id: client.id, active: !client.active })
-                        }
-                      />
-                    </td>
-                    <td className="py-3.5 px-4 text-text-secondary">
-                      {formatDateTime(client.createdAt)}
-                    </td>
-                    <td className="py-3.5 px-4 text-right">
-                      <Button
-                        variant="secondary"
-                        onClick={() => regenerateKeyMutation.mutate(client.id)}
-                        disabled={regenerateKeyMutation.isPending}
-                      >
-                        <RefreshCw className="mr-2 h-3.5 w-3.5" />
-                        Regenerate Key
-                      </Button>
-                    </td>
+          {/* Client Table Card */}
+          <Card className="rounded-[30px] p-6 shadow-panel">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm border-collapse">
+                <thead>
+                  <tr className="border-b border-border text-text-secondary font-medium">
+                    <th className="py-3 px-4">Client Name</th>
+                    <th className="py-3 px-4">Type</th>
+                    <th className="py-3 px-4">API Key Suffix</th>
+                    <th className="py-3 px-4">Active</th>
+                    <th className="py-3 px-4">Created Time</th>
+                    <th className="py-3 px-4 text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {allClients.map((client) => (
+                    <tr key={client.id} className="border-b border-border hover:bg-elevated/40">
+                      <td className="py-3.5 px-4 font-semibold text-text-primary">{client.name}</td>
+                      <td className="py-3.5 px-4">
+                        <Badge tone="info">{client.type}</Badge>
+                      </td>
+                      <td className="py-3.5 px-4 font-mono text-xs">••••••••{client.apiKeyLast4}</td>
+                      <td className="py-3.5 px-4">
+                        <Toggle
+                          checked={client.active}
+                          onChange={() =>
+                            toggleClientMutation.mutate({ id: client.id, active: !client.active })
+                          }
+                        />
+                      </td>
+                      <td className="py-3.5 px-4 text-text-secondary">
+                        {formatDateTime(client.createdAt)}
+                      </td>
+                      <td className="py-3.5 px-4 text-right">
+                        <Button
+                          variant="secondary"
+                          onClick={() => regenerateKeyMutation.mutate(client.id)}
+                          disabled={regenerateKeyMutation.isPending}
+                        >
+                          <RefreshCw className="mr-2 h-3.5 w-3.5" />
+                          Regenerate Key
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-          <div className="mt-6">
-            <Pagination
-              page={clientsPage}
-              totalPages={clientsQuery.data?.pagination.totalPages ?? 1}
-              onPageChange={setClientsPage}
-            />
-          </div>
-        </Card>
+            <div className="mt-6">
+              <Pagination
+                page={clientsPage}
+                totalPages={clientsQuery.data?.pagination.totalPages ?? 1}
+                onPageChange={setClientsPage}
+              />
+            </div>
+          </Card>
+        </>
       )}
 
       {/* Create Client Modal */}

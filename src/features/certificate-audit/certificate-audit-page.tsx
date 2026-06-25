@@ -205,7 +205,7 @@ export const CertificateAuditPage = () => {
       </div>
 
       {/* Quick Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {[
           {
             label: "Total Audited",
@@ -313,8 +313,8 @@ export const CertificateAuditPage = () => {
 
             {/* Records list/table */}
             {filteredRecords.length ? (
-              <div className="overflow-hidden rounded-[24px] border border-border bg-surface">
-                <div className="overflow-x-auto">
+              <div className="overflow-x-auto rounded-[24px] border border-border bg-surface no-scrollbar">
+                <div>
                   <table className="min-w-full border-collapse">
                     <thead className="bg-elevated">
                       <tr>
@@ -395,7 +395,7 @@ export const CertificateAuditPage = () => {
           </Card>
 
           {/* Right Panel — Details & History Card (2/5 width) */}
-          <Card className="lg:col-span-2 space-y-4 flex flex-col h-full sticky top-4">
+          <Card className="lg:col-span-2 space-y-4 flex flex-col h-full lg:sticky lg:top-4">
             {selectedRecord ? (
               <>
                 {/* Header */}
@@ -430,13 +430,13 @@ export const CertificateAuditPage = () => {
                       className="rounded p-1 hover:bg-muted transition-colors text-text-secondary/60 hover:text-text-primary shrink-0 focus:outline-none"
                       title="Copy Certificate ID"
                     >
-                      {copiedId ? <Check className="h-3.5 w-3.5 text-success animate-scale" /> : <Copy className="h-3.5 w-3.5" />}
+          {copiedId ? <Check className="h-3.5 w-3.5 text-success animate-scale" /> : <Copy className="h-3.5 w-3.5" />}
                     </button>
                   </div>
                 </div>
 
                 {/* Tabs */}
-                <div className="flex border-b border-border">
+                <div className="flex overflow-x-auto no-scrollbar border-b border-border">
                   {([
                     { id: "info", label: "Info", icon: Info },
                     { id: "data", label: "Payload", icon: Code },
@@ -452,7 +452,7 @@ export const CertificateAuditPage = () => {
                       <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
-                        className={`flex-1 py-2.5 text-xs font-bold border-b-2 transition-all duration-200 flex items-center justify-center gap-1.5 focus:outline-none ${
+                        className={`flex-1 py-2.5 text-xs font-bold border-b-2 transition-all duration-200 flex items-center justify-center gap-1.5 focus:outline-none shrink-0 ${
                           isActive
                             ? "border-primary text-primary bg-primary-soft/10"
                             : "border-transparent text-text-secondary hover:text-text-primary hover:border-border"

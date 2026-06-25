@@ -41,7 +41,7 @@ export const DataTable = <TData,>({
         value={globalFilter}
         onChange={(event) => setGlobalFilter(event.target.value)}
       />
-      <div className="overflow-hidden rounded-[24px] border border-border bg-surface">
+      <div className="overflow-x-auto rounded-[24px] border border-border bg-surface no-scrollbar">
         <table className="min-w-full border-collapse">
           <thead className="bg-elevated">
             {table.getHeaderGroups().map((headerGroup) => (

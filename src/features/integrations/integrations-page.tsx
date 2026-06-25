@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Tabs } from "@/components/ui/tabs";
 import { ClientsTab } from "./components/clients-tab";
 import { MappingsTab } from "./components/mappings-tab";
@@ -10,10 +8,6 @@ type TabValue = "clients" | "mappings" | "logs";
 
 export const IntegrationsPage = () => {
   const [activeTab, setActiveTab] = useState<TabValue>("clients");
-
-  // Callbacks/triggers to connect the main page header button to subcomponent modal states
-  const [addClientTrigger, setAddClientTrigger] = useState<(() => void) | null>(null);
-  const [addMappingTrigger, setAddMappingTrigger] = useState<(() => void) | null>(null);
 
   return (
     <div className="space-y-6">
@@ -35,27 +29,15 @@ export const IntegrationsPage = () => {
             value={activeTab}
             onChange={(tab) => setActiveTab(tab as TabValue)}
           />
-          {activeTab === "clients" && addClientTrigger && (
-            <Button onClick={addClientTrigger}>
-              <Plus className="mr-2 h-4 w-4" />
-              <span>Add Client</span>
-            </Button>
-          )}
-          {activeTab === "mappings" && addMappingTrigger && (
-            <Button onClick={addMappingTrigger}>
-              <Plus className="mr-2 h-4 w-4" />
-              <span>Add Mapping</span>
-            </Button>
-          )}
         </div>
       </div>
 
       {/* Tab Contents */}
       {activeTab === "clients" && (
-        <ClientsTab onAddClientTrigger={setAddClientTrigger} />
+        <ClientsTab />
       )}
       {activeTab === "mappings" && (
-        <MappingsTab onAddMappingTrigger={setAddMappingTrigger} />
+        <MappingsTab />
       )}
       {activeTab === "logs" && (
         <SyncLogsTab />

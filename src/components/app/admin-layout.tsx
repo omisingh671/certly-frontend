@@ -15,6 +15,17 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { cn } from "@/lib/cn";
 import { useToast } from "@/components/ui/toast";
 import type { UserRole } from "@/api/types";
+import {
+  Bell,
+  LayoutDashboard,
+  Layers,
+  GraduationCap,
+  Cpu,
+  Users,
+  KeyRound,
+  History,
+  Search,
+} from "lucide-react";
 
 const segmentLabels: Record<string, string> = {
   "": "Dashboard",
@@ -36,16 +47,16 @@ const ROLE_LEVEL: Record<UserRole, number> = {
 };
 
 const navigation = [
-  { to: "/", label: "Dashboard" },
-  { to: "/templates", label: "Templates" },
-  { to: "/batches", label: "Batches" },
-  { to: "/notifications", label: "Notifications" },
-  { to: "/integrations", label: "Integrations", minRole: "SUPER_ADMIN" as const },
-  { to: "/users", label: "Users", minRole: "SUPER_ADMIN" as const },
-  { to: "/sessions", label: "Sessions", minRole: "SUPER_ADMIN" as const },
+  { to: "/", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/templates", label: "Templates", icon: Layers },
+  { to: "/batches", label: "Batches", icon: GraduationCap },
+  { to: "/integrations", label: "Integrations", icon: Cpu, minRole: "SUPER_ADMIN" as const },
+  { to: "/users", label: "Users", icon: Users, minRole: "SUPER_ADMIN" as const },
+  { to: "/sessions", label: "Sessions", icon: KeyRound, minRole: "SUPER_ADMIN" as const },
   {
     to: "/certificate-audit",
     label: "Certificate audit",
+    icon: History,
     minRole: "SUPER_ADMIN" as const,
   },
 ];
@@ -59,7 +70,7 @@ const BrandLogo = ({
 }) => (
   <div
     className={cn(
-      "flex flex-col items-center rounded-2xl lg:border lg:border-border lg:bg-elevated/80 lg:px-3 py-3 lg:shadow-sm lg:backdrop-blur dark:bg-surface/35",
+      "flex flex-col items-start lg:items-center rounded-2xl lg:border lg:border-border lg:bg-elevated/80 lg:px-3 py-3 lg:shadow-sm lg:backdrop-blur dark:bg-surface/35",
       className,
     )}
   >
@@ -109,6 +120,16 @@ export const AdminLayout = () => {
     queryFn: () => api.templates.list(1, 100),
     enabled: onTemplatePage,
   });
+
+  const notificationsQuery = useQuery({
+    queryKey: ["notifications-badge"],
+    queryFn: () => api.notifications.list({ page: 1, limit: 1 }),
+    enabled: !!user,
+    refetchInterval: 15000,
+  });
+
+  const unreadCount = notificationsQuery.data?.unreadCount ?? 0;
+  const hasUnread = unreadCount > 0;
 
   const breadcrumbs = (() => {
     const crumbs: { label: string; to: string }[] = [
@@ -170,21 +191,30 @@ export const AdminLayout = () => {
               end={item.to === "/"}
               className={({ isActive }) =>
                 cn(
-                  "block rounded-2xl border px-4 py-3 text-sm font-medium transition-colors",
+                  "flex items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-medium transition-colors",
                   isActive
                     ? "border-primary bg-primary text-primary-foreground shadow-soft"
                     : "border-transparent text-text-secondary hover:bg-elevated hover:text-text-primary",
                 )
               }
             >
-              {item.label}
+              <item.icon className="h-4 w-4 shrink-0" />
+              <span>{item.label}</span>
             </NavLink>
           ))}
         <NavLink
           to="/verify"
-          className="block rounded-2xl px-4 py-3 text-sm font-medium text-text-secondary transition-colors hover:bg-elevated hover:text-text-primary"
+          className={({ isActive }) =>
+            cn(
+              "flex items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-medium transition-colors",
+              isActive
+                ? "border-primary bg-primary text-primary-foreground shadow-soft"
+                : "border-transparent text-text-secondary hover:bg-elevated hover:text-text-primary",
+            )
+          }
         >
-          Public verification
+          <Search className="h-4 w-4 shrink-0" />
+          <span>Public verification</span>
         </NavLink>
       </nav>
 
@@ -254,14 +284,29 @@ export const AdminLayout = () => {
   );
 
   return (
-    <div className="h-screen overflow-hidden bg-grid bg-size-40px_40px transition-colors">
+    <div className="h-dvh overflow-hidden bg-grid bg-size-40px_40px transition-colors">
       {/* Mobile topbar */}
       <div className="lg:hidden flex h-16 items-center justify-between border-b border-border bg-surface px-4 text-text-primary">
         <BrandLogo className="w-42 px-2 py-1" imageClassName="max-h-10" />
         <div className="flex items-center gap-2">
+          <Link
+            to="/notifications"
+            className={cn(
+              "focus-ring relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-surface/70 text-text-secondary shadow-sm backdrop-blur transition hover:bg-elevated hover:text-text-primary",
+              pathname === "/notifications" && "bg-primary text-primary-foreground border-primary shadow-soft"
+            )}
+            title="Notifications"
+          >
+            <Bell className="h-5 w-5" />
+            {hasUnread && (
+              <span className="absolute -top-1.5 -right-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-success px-1 text-[10px] font-bold text-white ring-2 ring-surface">
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
+            )}
+          </Link>
           <button
             onClick={() => setSidebarOpen(true)}
-            className="focus-ring rounded-xl p-2 transition-colors hover:bg-elevated"
+            className="focus-ring flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-surface/70 text-text-secondary shadow-sm backdrop-blur transition hover:bg-elevated hover:text-text-primary"
             aria-label="Open menu"
           >
             <svg
@@ -298,7 +343,7 @@ export const AdminLayout = () => {
           sidebarOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-6 shrink-0">
           <BrandLogo className="w-44 px-2 py-1" imageClassName="max-h-10" />
           <button
             onClick={() => setSidebarOpen(false)}
@@ -321,27 +366,25 @@ export const AdminLayout = () => {
             </svg>
           </button>
         </div>
-        {sidebarContent}
+        <div className="border-b border-border mb-6 shrink-0" />
+        <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar flex flex-col justify-between">
+          {sidebarContent}
+        </div>
       </aside>
 
       {/* Main grid (desktop sidebar + content) */}
-      <div
-        className="mx-auto grid max-w-400 gap-6 px-4 py-6
-        h-[calc(100dvh-4rem)] lg:h-screen
-        lg:grid-cols-[280px_1fr]"
-      >
+      <div className="w-full mx-auto grid max-w-[1600px] gap-6 px-4 py-6 h-[calc(100dvh-4rem)] lg:h-screen lg:grid-cols-[280px_1fr]">
         {/* Desktop sidebar */}
         <aside className="surface-card hidden flex-col rounded-4xl border px-5 py-6 text-text-primary shadow-panel lg:flex">
-          <div className="mb-8 space-y-2">
+          <div className="mb-8 space-y-2 shrink-0">
             <BrandLogo className="w-full" />
-            {/* <p className="text-sm text-primary-foreground font-medium mt-3">
-              Certificate operations, simplified.
-            </p> */}
           </div>
-          {sidebarContent}
+          <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar flex flex-col justify-between">
+            {sidebarContent}
+          </div>
         </aside>
 
-        <main className="flex min-h-0 flex-col gap-4 lg:gap-6">
+        <main className="flex min-h-0 min-w-0 flex-col gap-4 lg:gap-6">
           {/* Desktop header — hidden on mobile */}
           <header
             className="surface-card hidden items-center justify-between gap-6 rounded-4xl border px-6 py-5 shadow-panel lg:flex hover:shadow-soft transition-all duration-300"
@@ -377,7 +420,24 @@ export const AdminLayout = () => {
                 </nav>
               )}
             </div>
-            <ThemeToggle />
+            <div className="flex items-center gap-3">
+              <Link
+                to="/notifications"
+                className={cn(
+                  "focus-ring relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-surface/70 text-text-secondary shadow-sm backdrop-blur transition hover:bg-elevated hover:text-text-primary",
+                  pathname === "/notifications" && "bg-primary text-primary-foreground border-primary shadow-soft"
+                )}
+                title="Notifications"
+              >
+                <Bell className="h-5 w-5" />
+                {hasUnread && (
+                  <span className="absolute -top-1.5 -right-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-success px-1 text-[10px] font-bold text-white ring-2 ring-surface">
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </span>
+                )}
+              </Link>
+              <ThemeToggle />
+            </div>
           </header>
 
           {/* Mobile breadcrumb — shown only when not on root */}
@@ -403,7 +463,7 @@ export const AdminLayout = () => {
             </nav>
           )}
 
-          <div className="flex-1 overflow-y-auto rounded-4xl border border-border bg-elevated/60 px-4 py-4 backdrop-blur-sm transition-colors lg:px-6 lg:py-6">
+          <div className="flex-1 min-w-0 overflow-y-auto rounded-4xl border border-border bg-elevated/60 px-4 py-4 backdrop-blur-sm transition-colors lg:px-6 lg:py-6">
             <Outlet />
           </div>
         </main>
