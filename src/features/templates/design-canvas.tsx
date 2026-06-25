@@ -297,7 +297,7 @@ export const DesignCanvas = ({
   const rulerOffset = showRulers ? RULER_SIZE : 0;
   const stageWidth = layout.page.width + rulerOffset;
   const stageHeight = layout.page.height + rulerOffset;
-  const scale = useMemo(() => Math.max(MIN_SCALE, Math.min(1, containerWidth / stageWidth)), [containerWidth, stageWidth]);
+  const scale = useMemo(() => Math.max(MIN_SCALE, Math.min(1, Math.max(0, containerWidth - 48) / stageWidth)), [containerWidth, stageWidth]);
   const selectedIdSet = useMemo(() => new Set(selectedBlockIds), [selectedBlockIds]);
   const selectedBlocks = useMemo(
     () => layout.blocks.filter((block) => selectedIdSet.has(block.id)),
@@ -507,8 +507,9 @@ export const DesignCanvas = ({
     );
 
   return (
-    <div ref={containerRef} className="w-full overflow-auto border border-border">
-      <Stage
+    <div ref={containerRef} className="w-full overflow-auto border border-border bg-muted/20 p-4 flex justify-center">
+      <div className="shrink-0 shadow-soft bg-surface border border-border/50">
+        <Stage
         width={stageWidth * scale}
         height={stageHeight * scale}
         scaleX={scale}
@@ -680,6 +681,7 @@ export const DesignCanvas = ({
           </Group>
         </Layer>
       </Stage>
+      </div>
     </div>
   );
 };
